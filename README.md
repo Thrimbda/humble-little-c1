@@ -4,17 +4,18 @@
 
 ```text
 skills/
-  personal-skill/
-    SKILL.md                 # 空白 skill 模板，后续自行编辑
+  environments/
+    SKILL.md                 # 个人机器环境指南
+    references/              # 机器资料与 SOPS 加密凭据
 scripts/
   install-skills.sh           # 安装本仓库的全部 skills
 ```
 
 ## 编写 skill
 
-编辑 `skills/personal-skill/SKILL.md`，按用途重命名文件夹并修改 frontmatter 的 `name`、`description`，再填写正文。当前模板只有元数据和编辑提示，没有实际工作流程。
+现有的 [environments skill](skills/environments/SKILL.md) 提供个人机器的定位、配置和连接方式。机器资料与加密凭据的用法放在对应的 `references/` 中。
 
-新增 skill 时，在 `skills/<skill-name>/SKILL.md` 中使用同样的格式；安装脚本会自动发现全部 skills，包括当前占位模板。
+新增 skill 时，在 `skills/<skill-name>/SKILL.md` 中填写 frontmatter 的 `name`、`description` 和正文；安装脚本会自动发现全部 skills。
 
 ## 安装
 
