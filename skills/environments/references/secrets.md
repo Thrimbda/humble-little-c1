@@ -7,7 +7,7 @@
 - 非空值由 SOPS 加密，字段名仍可见；SOPS 元数据包含解密所需的 recipient 和加密数据密钥。
 - Charlie 上对应私钥是 `~/.ssh/id_ed25519`。SOPS 原生支持这个 SSH key，不需要转换或创建另一把 age key。
 - 私钥留在 `~/.ssh`，不放进 skill。这个 recipient 只允许持有匹配私钥的环境解密，不能假设五台机器各自的 SSH key 都能解密。
-- `axiom`、`acorn`、`charlie` 的 `ssh_user` 已按实测填为 `c1`。每台机器都预留了 `sudo_password: null`；**尚未录入任何真实密码**。`null` 是待填写标记，不是空密码，也不是可用凭据。
+- `axiom`、`acorn`、`charlie` 的 `ssh_user` 已按实测填为 `c1`。每台机器都预留了 `sudo_password` 字段；**尚未录入任何真实密码**。`null` 或空字符串都是待填写标记，不是空密码，也不是可用凭据；Charles 当前使用空字符串作为可编辑占位。
 
 SSH 本身继续使用现有 SSH 配置和密钥认证。若任务只需普通用户权限，无需解密密码。
 
