@@ -24,4 +24,20 @@ description: 当需要查询、使用或部署到 C1 的本地机器或阿里云
 3. 在对应机器的项目目录内工作；系统配置由 `~/dotfiles/hosts/<机器名>/` 管理，具体操作遵循 dotfiles 仓库的现有说明。长任务使用该机器已有的 `tmux` 或服务管理方式。
 4. 需要密码字段时，先读[加密凭据用法](references/secrets.md)。凭据载体是 [secrets.enc.yaml](references/secrets.enc.yaml)，解密结果直接进入消费命令的 stdin，不打印到工具输出、聊天或日志。
 
+## 构建与系统切换
+
+- **Acorn 不做构建。**它只承担常驻服务、公网入口和 SSH 中转；不得在其上运行 Nix Build（包括 `nixos-rebuild` 的本机构建步骤）、Rust/Cargo Build，或其他会显著占用 CPU、内存的编译任务。`max-jobs = 1` 和 `cores = 1` 只是保护下限，不是允许在 Acorn 上构建的理由。
+- **Nix / NixOS：Axiom 构建、目标机切换。**从持有 flake 和 SSH 配置的控制端调用 `nixos-rebuild`，以 `--build-host` 与 `--target-host` 分离构建和激活；例如切换 Acorn：
+
+  ```bash
+  nixos-rebuild switch --flake .#acorn \
+    --build-host axiom-tunnel \
+    --target-host azar \
+    --ask-sudo-password \
+    --sudo
+  ```
+
+  构建在 Axiom 上完成，`switch` 只在目标机执行。输入目标机对应的 sudo 密码；不得把密码写入命令行、日志或仓库。`--ask-sudo-password` 已隐含 `--sudo`，命令仍显式保留 `--sudo`，以明确远端激活需要 sudo。执行前确认 Axiom 能构建目标配置的 `system` / `crossSystem`；不兼容时不得退回 Acorn 本机构建。
+- **Rust：只在 Axiom 编译。**包括 Cargo 触发的编译。若 Echo 需要本地可用的产物，也先在 Axiom 按 Echo 的目标平台构建，再通过既有安全传输路径发送到 Echo；不得为了方便在 Acorn 上重新编译。
+
 机器配置和连通性核验于 **2026-09-06**。硬件建议基于配置，未进行跑分；服务状态、地址和可用资源会变化，执行任务时按需复核。Atlas 暂不开机探测；Charles 已在本机完成核验，详见 [机器资料](references/charles.md)。

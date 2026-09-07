@@ -36,7 +36,7 @@ ssh azar 'systemctl list-units --type=service --state=running --no-pager'
 
 本机另有 `Host acorn`，指向 `acorn.host.0xc1.space`，本次未核验该入口。操作本指南里的 Acorn 时使用已验证的 `azar`，并确认远端返回 `aliyun-acorn`。
 
-dotfiles 中的 `hosts/azar/default.nix` 是另一份工作站配置，不能用它代表当前云服务器。`hosts/acorn/modules/platform.nix` 将 Nix 构建设为 `max-jobs = 1`、`cores = 1`；机器内存较小，部署前应检查实际可用资源。
+dotfiles 中的 `hosts/azar/default.nix` 是另一份工作站配置，不能用它代表当前云服务器。`hosts/acorn/modules/platform.nix` 将 Nix 构建设为 `max-jobs = 1`、`cores = 1`；这只是保护下限。不得在 Acorn 上运行 Nix Build、Rust/Cargo Build 或其他重型编译；按[构建与系统切换](../SKILL.md#构建与系统切换)将构建交给 Axiom，Acorn 只作为目标机切换。
 
 采集时运行的业务服务包括 Nginx、Auth Mini 及其 gateway、FRP、RustDesk signal/relay、Vaultwarden 和 `constxd`。这是运行快照；具体服务入口和配置以任务涉及的模块、服务单元为准。
 
