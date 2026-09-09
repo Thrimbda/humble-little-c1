@@ -7,6 +7,10 @@ skills/
   environments/
     SKILL.md                 # 个人机器环境指南
     references/              # 机器资料与 SOPS 加密凭据
+  domains/
+    SKILL.md                 # 域名分工与 Cloudflare DNS 配置
+    references/              # 域名资料、操作说明与 SOPS 加密 token
+    scripts/                 # 通过加密凭据调用 Cloudflare API
 scripts/
   install-skills.sh           # 安装本仓库的全部 skills
 ```
