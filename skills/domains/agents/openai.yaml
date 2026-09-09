@@ -1,0 +1,4 @@
+interface:
+  display_name: "域名"
+  short_description: "管理个人域名与 Cloudflare DNS，按部署用途选择域名并使用加密凭据"
+  default_prompt: "使用 $domains 查询我的域名，并按部署用途准备 Cloudflare DNS 配置。"
