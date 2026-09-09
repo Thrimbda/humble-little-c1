@@ -11,7 +11,7 @@ python3 scripts/cloudflare_api.py GET '/zones/51e0b62129064be66905cc3272d4e786/d
 python3 scripts/cloudflare_api.py GET '/zones/0de1dd8c02d3f55de55d72de080d4d9a/dns_records?name=app.0xc1.space'
 ```
 
-列表响应根据 `result_info.total_pages` 继续翻页。脚本每次请求一页，不自动穷尽列表。当前 `.wang` DNS 请求会返回权限错误；不能把失败响应当成空清单。
+列表响应根据 `result_info.total_pages` 继续翻页。脚本每次请求一页，不自动穷尽列表。两个域名均已通过 DNS 读取验证；请求失败时不能把失败响应当成空清单。
 
 ## 写入示例
 
