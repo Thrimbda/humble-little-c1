@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" role="img" aria-labelledby="title desc">
+<title id="title">C1 默认配色情绪板</title><desc id="desc">左右对照浅色矿物白与深色石墨主题，展示表面、文字、选中、输入边界、焦点和四种状态色。精确数值见 mood-board.md。</desc>
+<style>text{font-family:"PingFang SC","Noto Sans CJK SC",sans-serif} .hex{font-family:ui-monospace,monospace}</style>
+<rect width="1280" height="1020" fill="#F5F5F2"/>
+<text x="40" y="52" fill="#22241F" font-size="28" font-weight="600" class="">C1 · 默认配色情绪板</text>
+<text x="40" y="85" fill="#65695F" font-size="15" font-weight="400" class="">克制、清醒、可信、专注、连续。颜色来自用户提供的视觉语言。</text>
+<rect x="32" y="120" width="592" height="842" fill="#FBFBF9" rx="0" stroke="#DFE1D9"/>
+<text x="60" y="169" fill="#22241F" font-size="24" font-weight="600" class="">浅色 · 矿物白</text>
+<text x="60" y="200" fill="#65695F" font-size="14" font-weight="400" class="">连续工作表面 / 语义颜色 / 清楚的状态</text>
+<rect x="60" y="232" width="168" height="96" fill="#F5F5F2" rx="0" stroke="#DFE1D9"/>
+<text x="60" y="352" fill="#22241F" font-size="14" font-weight="500" class="">辅助画布</text>
+<text x="60" y="375" fill="#65695F" font-size="13" font-weight="400" class="hex">#F5F5F2</text>
+<rect x="244" y="232" width="168" height="96" fill="#FBFBF9" rx="0" stroke="#DFE1D9"/>
+<text x="244" y="352" fill="#22241F" font-size="14" font-weight="500" class="">阅读表面</text>
+<text x="244" y="375" fill="#65695F" font-size="13" font-weight="400" class="hex">#FBFBF9</text>
+<rect x="428" y="232" width="168" height="96" fill="#FFFFFF" rx="0" stroke="#DFE1D9"/>
+<text x="428" y="352" fill="#22241F" font-size="14" font-weight="500" class="">抬升表面</text>
+<text x="428" y="375" fill="#65695F" font-size="13" font-weight="400" class="hex">#FFFFFF</text>
+<text x="60" y="434" fill="#22241F" font-size="28" font-weight="600" class="">让工作保持连续。</text>
+<text x="60" y="466" fill="#65695F" font-size="15" font-weight="400" class="">当前内容、真实状态与下一步动作清楚可见。</text>
+<rect x="60" y="493" width="104" height="36" fill="#22241F" rx="6"/>
+<text x="84" y="517" fill="#FBFBF9" font-size="14" font-weight="500" class="">主要操作</text>
+<text x="184" y="517" fill="#65695F" font-size="14" font-weight="400" class="">6px 控件圆角 · 正文保持平面</text>
+<rect x="60" y="572" width="26" height="26" fill="#22241F" rx="3" stroke="#DFE1D9"/>
+<text x="96" y="584" fill="#22241F" font-size="13" font-weight="500" class="">主要文字</text>
+<text x="96" y="606" fill="#65695F" font-size="12" font-weight="400" class="hex">#22241F</text>
+<rect x="244" y="572" width="26" height="26" fill="#65695F" rx="3" stroke="#DFE1D9"/>
+<text x="280" y="584" fill="#22241F" font-size="13" font-weight="500" class="">次要文字</text>
+<text x="280" y="606" fill="#65695F" font-size="12" font-weight="400" class="hex">#65695F</text>
+<rect x="428" y="572" width="26" height="26" fill="#F0F0EC" rx="3" stroke="#DFE1D9"/>
+<text x="464" y="584" fill="#22241F" font-size="13" font-weight="500" class="">悬停底色</text>
+<text x="464" y="606" fill="#65695F" font-size="12" font-weight="400" class="hex">#F0F0EC</text>
+<rect x="60" y="664" width="26" height="26" fill="#EBEDE6" rx="3" stroke="#DFE1D9"/>
+<text x="96" y="676" fill="#22241F" font-size="13" font-weight="500" class="">选中底色</text>
+<text x="96" y="698" fill="#65695F" font-size="12" font-weight="400" class="hex">#EBEDE6</text>
+<rect x="244" y="664" width="26" height="26" fill="#898E82" rx="3" stroke="#DFE1D9"/>
+<text x="280" y="676" fill="#22241F" font-size="13" font-weight="500" class="">输入边界</text>
+<text x="280" y="698" fill="#65695F" font-size="12" font-weight="400" class="hex">#898E82</text>
+<rect x="428" y="664" width="26" height="26" fill="#2458A6" rx="3" stroke="#DFE1D9"/>
+<text x="464" y="676" fill="#22241F" font-size="13" font-weight="500" class="">焦点提示</text>
+<text x="464" y="698" fill="#65695F" font-size="12" font-weight="400" class="hex">#2458A6</text>
+<text x="60" y="781" fill="#22241F" font-size="16" font-weight="600" class="">颜色解释意义</text>
+<rect x="60" y="805" width="122" height="38" fill="#EDF2FB" rx="3"/>
+<text x="74" y="830" fill="#2458A6" font-size="14" font-weight="500" class="">信息</text>
+<text x="60" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#2458A6</text>
+<rect x="198" y="805" width="122" height="38" fill="#EAF3ED" rx="3"/>
+<text x="212" y="830" fill="#28704D" font-size="14" font-weight="500" class="">成功</text>
+<text x="198" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#28704D</text>
+<rect x="336" y="805" width="122" height="38" fill="#FBF1DA" rx="3"/>
+<text x="350" y="830" fill="#895B13" font-size="14" font-weight="500" class="">待判断</text>
+<text x="336" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#895B13</text>
+<rect x="474" y="805" width="122" height="38" fill="#FCECEE" rx="3"/>
+<text x="488" y="830" fill="#B33236" font-size="14" font-weight="500" class="">失败</text>
+<text x="474" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#B33236</text>
+<text x="60" y="923" fill="#65695F" font-size="13" font-weight="400" class="">状态同时有文字，不能只依靠颜色。</text>
+<rect x="656" y="120" width="592" height="842" fill="#20221E" rx="0" stroke="#3C4037"/>
+<text x="684" y="169" fill="#EDEEE8" font-size="24" font-weight="600" class="">深色 · 石墨</text>
+<text x="684" y="200" fill="#B2B7A9" font-size="14" font-weight="400" class="">连续工作表面 / 语义颜色 / 清楚的状态</text>
+<rect x="684" y="232" width="168" height="96" fill="#191B18" rx="0" stroke="#3C4037"/>
+<text x="684" y="352" fill="#EDEEE8" font-size="14" font-weight="500" class="">辅助画布</text>
+<text x="684" y="375" fill="#B2B7A9" font-size="13" font-weight="400" class="hex">#191B18</text>
+<rect x="868" y="232" width="168" height="96" fill="#20221E" rx="0" stroke="#3C4037"/>
+<text x="868" y="352" fill="#EDEEE8" font-size="14" font-weight="500" class="">阅读表面</text>
+<text x="868" y="375" fill="#B2B7A9" font-size="13" font-weight="400" class="hex">#20221E</text>
+<rect x="1052" y="232" width="168" height="96" fill="#282B25" rx="0" stroke="#3C4037"/>
+<text x="1052" y="352" fill="#EDEEE8" font-size="14" font-weight="500" class="">抬升表面</text>
+<text x="1052" y="375" fill="#B2B7A9" font-size="13" font-weight="400" class="hex">#282B25</text>
+<text x="684" y="434" fill="#EDEEE8" font-size="28" font-weight="600" class="">让工作保持连续。</text>
+<text x="684" y="466" fill="#B2B7A9" font-size="15" font-weight="400" class="">当前内容、真实状态与下一步动作清楚可见。</text>
+<rect x="684" y="493" width="104" height="36" fill="#E7EBDF" rx="6"/>
+<text x="708" y="517" fill="#22241F" font-size="14" font-weight="500" class="">主要操作</text>
+<text x="808" y="517" fill="#B2B7A9" font-size="14" font-weight="400" class="">6px 控件圆角 · 正文保持平面</text>
+<rect x="684" y="572" width="26" height="26" fill="#EDEEE8" rx="3" stroke="#3C4037"/>
+<text x="720" y="584" fill="#EDEEE8" font-size="13" font-weight="500" class="">主要文字</text>
+<text x="720" y="606" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#EDEEE8</text>
+<rect x="868" y="572" width="26" height="26" fill="#B2B7A9" rx="3" stroke="#3C4037"/>
+<text x="904" y="584" fill="#EDEEE8" font-size="13" font-weight="500" class="">次要文字</text>
+<text x="904" y="606" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#B2B7A9</text>
+<rect x="1052" y="572" width="26" height="26" fill="#2C2F28" rx="3" stroke="#3C4037"/>
+<text x="1088" y="584" fill="#EDEEE8" font-size="13" font-weight="500" class="">悬停底色</text>
+<text x="1088" y="606" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#2C2F28</text>
+<rect x="684" y="664" width="26" height="26" fill="#34382E" rx="3" stroke="#3C4037"/>
+<text x="720" y="676" fill="#EDEEE8" font-size="13" font-weight="500" class="">选中底色</text>
+<text x="720" y="698" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#34382E</text>
+<rect x="868" y="664" width="26" height="26" fill="#727A66" rx="3" stroke="#3C4037"/>
+<text x="904" y="676" fill="#EDEEE8" font-size="13" font-weight="500" class="">输入边界</text>
+<text x="904" y="698" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#727A66</text>
+<rect x="1052" y="664" width="26" height="26" fill="#A5C2FF" rx="3" stroke="#3C4037"/>
+<text x="1088" y="676" fill="#EDEEE8" font-size="13" font-weight="500" class="">焦点提示</text>
+<text x="1088" y="698" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#A5C2FF</text>
+<text x="684" y="781" fill="#EDEEE8" font-size="16" font-weight="600" class="">颜色解释意义</text>
+<rect x="684" y="805" width="122" height="38" fill="#283346" rx="3"/>
+<text x="698" y="830" fill="#A5C2FF" font-size="14" font-weight="500" class="">信息</text>
+<text x="684" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#A5C2FF</text>
+<rect x="822" y="805" width="122" height="38" fill="#273A2E" rx="3"/>
+<text x="836" y="830" fill="#9CD7B4" font-size="14" font-weight="500" class="">成功</text>
+<text x="822" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#9CD7B4</text>
+<rect x="960" y="805" width="122" height="38" fill="#3C3424" rx="3"/>
+<text x="974" y="830" fill="#E8C278" font-size="14" font-weight="500" class="">待判断</text>
+<text x="960" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#E8C278</text>
+<rect x="1098" y="805" width="122" height="38" fill="#44292D" rx="3"/>
+<text x="1112" y="830" fill="#FFADB0" font-size="14" font-weight="500" class="">失败</text>
+<text x="1098" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#FFADB0</text>
+<text x="684" y="923" fill="#B2B7A9" font-size="13" font-weight="400" class="">状态同时有文字，不能只依靠颜色。</text>
+<text x="40" y="996" fill="#65695F" font-size="13" font-weight="400" class="">2026-09-10 · Skill 草稿 · 精确 token、字体与尺寸见 references/mood-board.md</text>
+</svg>
