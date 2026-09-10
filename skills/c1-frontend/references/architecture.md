@@ -14,30 +14,11 @@
 
 页面决定用户如何完成工作，基础组件提供稳定的交互和视觉契约。主题改变表达，不改变权限、保存、执行与完成的含义。
 
-以下是按职责组织的示意；按现有项目规模合并或拆分，不为符合目录图创建空层：
-
-```text
-src/
-  app/                   # 应用壳、入口、全局 provider
-  features/<feature>/    # 页面、业务组件、该功能的状态与请求
-  components/ui/         # 项目拥有的 shadcn 组件及共享变体
-  lib/                   # cn 等无业务工具
-  styles/
-    theme.css            # 颜色、字体、形状及 Tailwind 语义映射
-    globals.css          # 样式入口、基础排版和全局约定
-```
-
-状态默认从 React Hooks 和必要的 Context 起步；跨页面 URL、服务端缓存或复杂共享状态出现真实需求后，再选择相应工具。不要把 Constx 的编辑器、认证、事件订阅、Rust 服务和静态资源嵌入链路复制成所有项目的依赖。
-
 ## shadcn 与 Base UI
 
-- 初始化时明确选择 **Base UI**。蓝本中的 `base-nova` 是其当时的生成风格；它可作为紧凑起点，不能代替本 Skill 的最终 token 与组件规范，也不应假定未来 CLI 始终使用同一名字。
-- 核对 `components.json`、生成组件的 import 和锁文件，确认交互依赖为 `@base-ui/react`。`baseColor: neutral` 只是初始配色选择，不妨碍使用独立品牌色。
-- 基础组件源码归项目维护。更新或添加组件前查看本地修改，避免生成器覆盖已确认的变体和交互。
-- Base UI 的元素组合使用其实际 `render` API；不要照搬 Radix 的 `asChild`。自定义 render 元素必须把属性和 ref 传到正确的 DOM 节点，保留事件合并与键盘行为。
-- 生成器的不同版本可能改变组件结构和依赖。以当前文档与源码为准，不在 Skill 中锁死整套生成命令。
+使用 shadcn/ui 的 **Base UI 版本**，交互原语采用 `@base-ui/react`。组件源码由项目维护，外观、尺寸与变体遵循本 Skill 的情绪板和组件规范。
 
-当前搭配已通过 [shadcn 的 Vite 文档](https://ui.shadcn.com/docs/installation/vite)、[主题文档](https://ui.shadcn.com/docs/theming)及 [Base UI 组合文档](https://base-ui.com/react/handbook/composition)核对（2026-09-10）。实施时再次核对版本相关部分。
+技术文档：[shadcn 的 Vite 集成](https://ui.shadcn.com/docs/installation/vite)、[主题](https://ui.shadcn.com/docs/theming)与 [Base UI 组件组合](https://base-ui.com/react/handbook/composition)。
 
 ## 样式与主题
 
@@ -81,7 +62,7 @@ Tailwind 4 的 Vite 集成使用 `@tailwindcss/vite`，CSS 入口使用 `@import
 }
 ```
 
-使用 `bg-background text-foreground`、`bg-primary text-primary-foreground`、`border-input` 等语义组合。普通分隔线的 `border` 比输入边界浅，不要混用。HEX 是原材料的精确色样；若项目使用 OKLCH，做等值转换后维护单一来源，不因颜色格式改变已确定的气质。
+使用 `bg-background text-foreground`、`bg-primary text-primary-foreground`、`border-input` 等语义组合。普通分隔线的 `border` 比输入边界浅，不要混用。
 
 局部页面可以控制布局；公共颜色、字体、形状与交互尺寸集中维护。相同差异重复出现时提取 variant，不为单个页面搭建庞大的组件封装。
 

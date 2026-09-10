@@ -3,7 +3,7 @@
 <style>text{font-family:"PingFang SC","Noto Sans CJK SC",sans-serif} .hex{font-family:ui-monospace,monospace}</style>
 <rect width="1280" height="1020" fill="#F5F5F2"/>
 <text x="40" y="52" fill="#22241F" font-size="28" font-weight="600" class="">C1 · 默认配色情绪板</text>
-<text x="40" y="85" fill="#65695F" font-size="15" font-weight="400" class="">克制、清醒、可信、专注、连续。颜色来自用户提供的视觉语言。</text>
+<text x="40" y="85" fill="#65695F" font-size="15" font-weight="400" class="">克制、清醒、可信、专注、连续。</text>
 <rect x="32" y="120" width="592" height="842" fill="#FBFBF9" rx="0" stroke="#DFE1D9"/>
 <text x="60" y="169" fill="#22241F" font-size="24" font-weight="600" class="">浅色 · 矿物白</text>
 <text x="60" y="200" fill="#65695F" font-size="14" font-weight="400" class="">连续工作表面 / 语义颜色 / 清楚的状态</text>
@@ -16,7 +16,7 @@
 <rect x="428" y="232" width="168" height="96" fill="#FFFFFF" rx="0" stroke="#DFE1D9"/>
 <text x="428" y="352" fill="#22241F" font-size="14" font-weight="500" class="">抬升表面</text>
 <text x="428" y="375" fill="#65695F" font-size="13" font-weight="400" class="hex">#FFFFFF</text>
-<text x="60" y="434" fill="#22241F" font-size="28" font-weight="600" class="">让工作保持连续。</text>
+<text x="60" y="434" fill="#22241F" font-size="28" font-weight="600" class="">清晰、易用的产品界面。</text>
 <text x="60" y="466" fill="#65695F" font-size="15" font-weight="400" class="">当前内容、真实状态与下一步动作清楚可见。</text>
 <rect x="60" y="493" width="104" height="36" fill="#22241F" rx="6"/>
 <text x="84" y="517" fill="#FBFBF9" font-size="14" font-weight="500" class="">主要操作</text>
@@ -65,7 +65,7 @@
 <rect x="1052" y="232" width="168" height="96" fill="#282B25" rx="0" stroke="#3C4037"/>
 <text x="1052" y="352" fill="#EDEEE8" font-size="14" font-weight="500" class="">抬升表面</text>
 <text x="1052" y="375" fill="#B2B7A9" font-size="13" font-weight="400" class="hex">#282B25</text>
-<text x="684" y="434" fill="#EDEEE8" font-size="28" font-weight="600" class="">让工作保持连续。</text>
+<text x="684" y="434" fill="#EDEEE8" font-size="28" font-weight="600" class="">清晰、易用的产品界面。</text>
 <text x="684" y="466" fill="#B2B7A9" font-size="15" font-weight="400" class="">当前内容、真实状态与下一步动作清楚可见。</text>
 <rect x="684" y="493" width="104" height="36" fill="#E7EBDF" rx="6"/>
 <text x="708" y="517" fill="#22241F" font-size="14" font-weight="500" class="">主要操作</text>
