@@ -4,6 +4,10 @@
 
 ```text
 skills/
+  c1-frontend/
+    SKILL.md                 # 前端工程默认值与产品气质
+    references/              # C1 架构、视觉基础与组件规范
+    assets/                  # 配色情绪板
   environments/
     SKILL.md                 # 个人机器环境指南
     references/              # 机器资料与 SOPS 加密凭据
@@ -20,6 +24,8 @@ scripts/
 现有的 [environments skill](skills/environments/SKILL.md) 提供个人机器的定位、配置和连接方式。机器资料与加密凭据的用法放在对应的 `references/` 中。
 
 新增 skill 时，在 `skills/<skill-name>/SKILL.md` 中填写 frontmatter 的 `name`、`description` 和正文；安装脚本会自动发现全部 skills。
+
+[C1 前端 skill](skills/c1-frontend/SKILL.md) 包含任务组织、视觉基础、组件与数据表达规范；主文件和参考文档均随 skill 目录安装。
 
 ## 安装
 

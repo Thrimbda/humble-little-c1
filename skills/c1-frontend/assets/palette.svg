@@ -47,7 +47,7 @@
 <text x="212" y="830" fill="#28704D" font-size="14" font-weight="500" class="">成功</text>
 <text x="198" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#28704D</text>
 <rect x="336" y="805" width="122" height="38" fill="#FBF1DA" rx="3"/>
-<text x="350" y="830" fill="#895B13" font-size="14" font-weight="500" class="">待判断</text>
+<text x="350" y="830" fill="#895B13" font-size="14" font-weight="500" class="">需注意</text>
 <text x="336" y="868" fill="#65695F" font-size="12" font-weight="400" class="hex">#895B13</text>
 <rect x="474" y="805" width="122" height="38" fill="#FCECEE" rx="3"/>
 <text x="488" y="830" fill="#B33236" font-size="14" font-weight="500" class="">失败</text>
@@ -96,7 +96,7 @@
 <text x="836" y="830" fill="#9CD7B4" font-size="14" font-weight="500" class="">成功</text>
 <text x="822" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#9CD7B4</text>
 <rect x="960" y="805" width="122" height="38" fill="#3C3424" rx="3"/>
-<text x="974" y="830" fill="#E8C278" font-size="14" font-weight="500" class="">待判断</text>
+<text x="974" y="830" fill="#E8C278" font-size="14" font-weight="500" class="">需注意</text>
 <text x="960" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#E8C278</text>
 <rect x="1098" y="805" width="122" height="38" fill="#44292D" rx="3"/>
 <text x="1112" y="830" fill="#FFADB0" font-size="14" font-weight="500" class="">失败</text>
