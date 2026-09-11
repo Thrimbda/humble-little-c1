@@ -1,0 +1,4 @@
+interface:
+  display_name: "前端设计与实现"
+  short_description: "为所有前端设计与实现提供统一的工程、视觉和交互规范"
+  default_prompt: "使用 $frontend 完成当前前端设计或实现任务，遵循现有项目约定和本 Skill 的设计与工程规范。"

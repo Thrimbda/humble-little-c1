@@ -1,4 +1,0 @@
-interface:
-  display_name: "C1 前端工程与产品气质"
-  short_description: "以成熟前端底座、语义主题和克制的组件细节建立安静连续的产品体验"
-  default_prompt: "使用 $c1-frontend，根据产品任务与现有设计实现前端，默认采用 Tailwind CSS 和基于 Base UI 的 shadcn/ui。"
