@@ -1,6 +1,6 @@
 # 架构与维护边界
 
-新项目默认使用 React、TypeScript、Vite、Tailwind CSS 4 和基于 Base UI 的 shadcn/ui。已有项目只在任务授权的范围内调整架构。
+新项目默认使用 React、TypeScript、Vite、Tailwind CSS 4 和基于 Base UI 的 shadcn/ui。已有项目保留框架、路由、目录、组件约定、构建系统和交付形式，在自然负责该体验的文件中修改，只在任务授权范围内调整架构。
 
 ## 职责与依赖
 
@@ -18,6 +18,14 @@
 
 使用 shadcn/ui 的 **Base UI 版本**，交互原语采用 `@base-ui/react`。组件源码由项目维护，外观、尺寸与变体遵循本 Skill 的情绪板和组件规范。
 
+新增组件后，按 C1 规范检查并调整默认尺寸、圆角、字级、焦点、状态色和内容溢出行为。上游样式只是起点，替换主题变量不代表适配完成；调整集中在共享组件或其 variant，不在各页面重复覆盖。
+
+- **内容适配。** 检查固定高度、不换行和收缩规则，确保长中文标签与窄屏不会被裁剪。
+- **状态含义。** 悬停、键盘焦点、选中与处理中分别表达。上游同名 token（例如 `accent`）可能承担不同状态，按实际用途映射。
+- **最终呈现。** 对比度按实际组件的颜色、透明度与叠层检查；同时验证 portal 主题继承和组合后的状态保持。
+
+版本相关的安装、属性与组合 API 按项目锁定版本核对官方文档。Base UI 的组合方式使用其对应接口，不凭记忆套用其他底层库的属性。
+
 技术文档：[shadcn 的 Vite 集成](https://ui.shadcn.com/docs/installation/vite)、[主题](https://ui.shadcn.com/docs/theming)与 [Base UI 组件组合](https://base-ui.com/react/handbook/composition)。
 
 ## 样式与主题
@@ -26,7 +34,7 @@ Tailwind 负责 utility、响应式与状态选择器，CVA 负责共享组件�
 
 Tailwind 4 的 Vite 集成使用 `@tailwindcss/vite`，CSS 入口使用 `@import "tailwindcss"`。通过 `@theme inline` 把运行时变量映射到 utility，避免把一套品牌值分别维护在 CSS 与 Tailwind 配置中。
 
-下面仅示意主题映射方式；全量角色取值见 [情绪板](mood-board.md)。路径、导入顺序和其他角色按项目补齐：
+默认设计取值由 [情绪板](mood-board.md) 维护，下面的代码只示意主题映射；项目采用后以其已确认的主题与组件为准，不随 Skill 更新自动改版。路径、导入顺序和其他角色按项目补齐：
 
 ```css
 @import "tailwindcss";
