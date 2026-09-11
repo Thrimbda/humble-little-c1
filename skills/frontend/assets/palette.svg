@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" role="img" aria-labelledby="title desc">
-<title id="title">C1 默认配色情绪板</title><desc id="desc">左右对照浅色矿物白与深色石墨主题，展示表面、文字、选中、输入边界、焦点和四种状态色。精确数值见 mood-board.md。</desc>
+<title id="title">默认配色情绪板</title><desc id="desc">左右对照浅色矿物白与深色石墨主题，展示表面、文字、选中、输入边界、焦点和四种状态色。精确数值见 mood-board.md。</desc>
 <style>text{font-family:"PingFang SC","Noto Sans CJK SC",sans-serif} .hex{font-family:ui-monospace,monospace}</style>
 <rect width="1280" height="1020" fill="#F5F5F2"/>
-<text x="40" y="52" fill="#22241F" font-size="28" font-weight="600" class="">C1 · 默认配色情绪板</text>
+<text x="40" y="52" fill="#22241F" font-size="28" font-weight="600" class="">默认配色情绪板</text>
 <text x="40" y="85" fill="#65695F" font-size="15" font-weight="400" class="">克制、清醒、可信、专注、连续。</text>
 <rect x="32" y="120" width="592" height="842" fill="#FBFBF9" rx="0" stroke="#DFE1D9"/>
 <text x="60" y="169" fill="#22241F" font-size="24" font-weight="600" class="">浅色 · 矿物白</text>
@@ -102,5 +102,5 @@
 <text x="1112" y="830" fill="#FFADB0" font-size="14" font-weight="500" class="">失败</text>
 <text x="1098" y="868" fill="#B2B7A9" font-size="12" font-weight="400" class="hex">#FFADB0</text>
 <text x="684" y="923" fill="#B2B7A9" font-size="13" font-weight="400" class="">状态同时有文字，不能只依靠颜色。</text>
-<text x="40" y="996" fill="#65695F" font-size="13" font-weight="400" class="">2026-09-10 · Skill 草稿 · 精确 token、字体与尺寸见 references/mood-board.md</text>
+<text x="40" y="996" fill="#65695F" font-size="13" font-weight="400" class="">精确 token、字体与尺寸见 references/mood-board.md</text>
 </svg>
