@@ -1,9 +1,11 @@
 ---
 name: environments
-description: 当需要查询、使用或部署到 C1 的本地机器或阿里云服务器时，使用此 skill 确认机器定位、配置、SSH 入口和加密凭据的使用方式。
+description: 当需要查询、使用或部署到 C1 的机器，或使用 C1 的 AWS、阿里云账号访问云服务时使用。
 ---
 
 # 环境指南
+
+机器连接与部署按下表选择；AWS、阿里云 API 操作读取[云服务访问](references/cloud-access.md)，其中包含账号来源、区域选择和从 SOPS 凭据调用 CLI 的方法。
 
 ## 选择机器
 
@@ -22,7 +24,7 @@ description: 当需要查询、使用或部署到 C1 的本地机器或阿里云
 1. 按任务选择机器，再核对当前执行位置。`charlie` 不代表安装本 skill 的任意机器；先用 `hostname`、`uname -m` 确认。
 2. SSH 优先使用资料中的已验证入口。自动执行可加 `-o BatchMode=yes -o ConnectTimeout=8`；连接后核对主机名。Axiom 的局域网直连与公网中转是两条不同路径，直连失败时使用 `axiom-tunnel`。
 3. 在对应机器的项目目录内工作；系统配置由 `~/dotfiles/hosts/<机器名>/` 管理，具体操作遵循 dotfiles 仓库的现有说明。长任务使用该机器已有的 `tmux` 或服务管理方式。
-4. 需要密码字段时，先读[加密凭据用法](references/secrets.md)。凭据载体是 [secrets.enc.yaml](references/secrets.enc.yaml)，解密结果直接进入消费命令的 stdin，不打印到工具输出、聊天或日志。
+4. 需要机器密码或云凭据时，先读[加密凭据用法](references/secrets.md)。凭据载体是 [secrets.enc.yaml](references/secrets.enc.yaml)，解密结果只经内存、管道或单次子进程环境传给消费命令，不打印到工具输出、聊天或日志。
 
 ## 构建与系统切换
 
