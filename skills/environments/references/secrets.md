@@ -5,9 +5,10 @@
 ## 文件与密钥
 
 - 非空值由 SOPS 加密，字段名仍可见；SOPS 元数据包含解密所需的 recipient 和加密数据密钥。
-- Charlie 上对应私钥是 `~/.ssh/id_ed25519`。SOPS 原生支持这个 SSH key，不需要转换或创建另一把 age key。
+- Charles 已用 `~/.ssh/id_ed25519` 验证可解密；Charlie 的既有用法也是这个路径。SOPS 原生支持这个 SSH key，不需要转换或创建另一把 age key。
 - 私钥留在 `~/.ssh`，不放进 skill。这个 recipient 只允许持有匹配私钥的环境解密，不能假设五台机器各自的 SSH key 都能解密。
-- `axiom`、`acorn`、`charlie` 的 `ssh_user` 已按实测填为 `c1`。每台机器都预留了 `sudo_password` 字段；**尚未录入任何真实密码**。`null` 或空字符串都是待填写标记，不是空密码，也不是可用凭据；Charles 当前使用空字符串作为可编辑占位。
+- 机器凭据位于各机器的 `ssh_user`、`sudo_password` 字段。当前五组字段均非空，但非空不代表密码已通过登录或 sudo 验证。`null` 或空字符串是待填写标记，不是空密码。
+- AWS 凭据位于 `aws`，阿里云凭据位于 `aliyun`；两组均从 Charles 的既有 CLI 配置导入。字段、来源和调用方法见[云服务访问](cloud-access.md)。
 
 SSH 本身继续使用现有 SSH 配置和密钥认证。若任务只需普通用户权限，无需解密密码。
 
@@ -19,7 +20,7 @@ SSH 本身继续使用现有 SSH 配置和密钥认证。若任务只需普通�
 # SOPS 不在 PATH 时，用 Nix 提供它；无需修改系统配置
 nix shell nixpkgs#sops -c sops --version
 
-# 由用户在本地编辑器中填入密码，保存后由 SOPS 重新加密
+# 由用户在本地编辑器中更新凭据，保存后由 SOPS 重新加密
 SOPS_AGE_SSH_PRIVATE_KEY_FILE="$HOME/.ssh/id_ed25519" \
   nix shell nixpkgs#sops -c sops edit references/secrets.enc.yaml
 
@@ -29,7 +30,7 @@ nix shell nixpkgs#sops -c sops filestatus references/secrets.enc.yaml
 
 已安装 `sops` 时可以直接调用，省去 `nix shell nixpkgs#sops -c`。SOPS 默认也会查找 `~/.ssh/id_ed25519`；显式指定 `SOPS_AGE_SSH_PRIVATE_KEY_FILE` 可以固定本次使用的私钥路径。
 
-用户编辑会在本地编辑器中显示明文，agent 执行时不要打开该编辑器、读取完整解密文件或把密码写进 shell 命令参数。应编辑仓库内的文件，再重新运行仓库安装脚本更新副本。
+用户编辑会在本地编辑器中显示明文，agent 执行时不要打开该编辑器、展示完整解密文件或把凭据写进 shell 命令参数。自动更新时用 `sops set --value-stdin` 从管道或子进程 stdin 接收 JSON 值，不把值拼入命令。应编辑仓库内的文件；安装副本通过仓库安装脚本更新。
 
 ## 通过 stdin 使用单个字段
 
@@ -59,6 +60,6 @@ sys.stdout.write(value + "\n")
 
 这条管道只输出目标命令的结果，密码不会出现在工具返回内容或命令行参数里。空值、解密失败或格式不符时不产生密码行，远端也不会执行 sudo。不要开启 `set -x`，不要插入 `tee`、`cat` 或调试输出；消费命令本身也不能回显输入。
 
-其他机器替换字段名与目标即可：`acorn.sudo_password` 对应 `ssh azar`，`charlie.sudo_password` 在 Charlie 本机消费。Atlas 和 Charles 的凭据与连接方法留待补充。非交互自动化不要使用 `ssh -t`，它可能让终端回显密码。
+其他机器替换字段名与目标即可：`acorn.sudo_password` 对应 `ssh azar`，`charlie.sudo_password` 在 Charlie 本机消费，`charles.sudo_password` 在 Charles 本机消费。Atlas 的可用连接仍待开机后核验。非交互自动化不要使用 `ssh -t`，它可能让终端回显密码。
 
-密文与加密规则会随 skill 一起安装。运行时只在内存和管道里传递选中的字段，不把解密后的 YAML 写回磁盘或提交到 Git。
+密文与加密规则会随 skill 一起安装。运行时只在内存、管道和单次子进程环境里传递选中的字段，不把解密后的 YAML 写回磁盘或提交到 Git。

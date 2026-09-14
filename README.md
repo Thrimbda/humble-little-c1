@@ -9,8 +9,9 @@ skills/
     references/              # 架构、视觉基础与组件规范
     assets/                  # 配色情绪板
   environments/
-    SKILL.md                 # 个人机器环境指南
-    references/              # 机器资料与 SOPS 加密凭据
+    SKILL.md                 # 个人机器与云服务环境指南
+    references/              # 机器资料、AWS/阿里云用法与 SOPS 加密凭据
+    scripts/                 # 通过加密凭据调用 AWS / 阿里云 CLI
   domains/
     SKILL.md                 # 域名分工与 Cloudflare DNS 配置
     references/              # 域名资料、操作说明与 SOPS 加密 token
@@ -21,7 +22,7 @@ scripts/
 
 ## 编写 skill
 
-现有的 [environments skill](skills/environments/SKILL.md) 提供个人机器的定位、配置和连接方式。机器资料与加密凭据的用法放在对应的 `references/` 中。
+现有的 [environments skill](skills/environments/SKILL.md) 提供个人机器的定位、配置和连接方式，以及 AWS、阿里云账号的访问入口。机器资料、云服务与加密凭据的用法放在对应的 `references/` 中。
 
 新增 skill 时，在 `skills/<skill-name>/SKILL.md` 中填写 frontmatter 的 `name`、`description` 和正文；安装脚本会自动发现全部 skills。
 
