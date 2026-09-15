@@ -16,7 +16,7 @@ AWS 与原 `prod` 凭据于 **2026-09-14** 导入；Humble Little C1 于 **2026-
 
 AWS 使用 `access_key_id`、`secret_access_key`；每组阿里云记录使用 `access_key_id`、`access_key_secret`、`mode: AK`，并保存实测的完整 `account_id` 和 `identity_type`。`source_profile` 或 `source_file` 记录导入来源，脚本只读密文，不依赖原 profile 或 CSV。凭据导入不会同步后续来源变更，轮换后需更新密文并重新验证。
 
-这里的阿里云账号访问使用 OpenAPI；登录 Acorn 仍用机器资料里的 `ssh azar`。
+这里的阿里云账号访问使用 OpenAPI；SSH 登录按机器资料操作：[Acorn](acorn.md) 使用 `ssh azar`，[Ant](ant.md) 使用 `ssh c1@106.15.156.143`。Ant 属于 `humble-little-c1` 账号、位于 `cn-shanghai`，产品为轻量应用服务器（Simple Application Server / `swas-open`），应使用该产品的 API 查询，而不是 ECS 实例列表。
 
 ## 执行命令
 
