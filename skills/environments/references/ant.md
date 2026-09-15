@@ -1,8 +1,6 @@
 # ant
 
-Humble Little C1 账号下的阿里云轻量服务器，作为 FRP 与全部中转流量从 Acorn 迁出的目标。按 C1 于 **2026-09-15** 提供的套餐信息，Ant 流量不限量，适合承担原来由按流量计费的 Acorn 承载的中转职责。
-
-目前已部署 Acorn 同源的 NixOS 基础环境，**FRP 和业务服务尚未迁入**。新增 FRP／中转部署优先安排到 Ant；Acorn 的其他常驻应用继续保留原位。
+Humble Little C1 账号下的阿里云轻量服务器，负责全部中转流量，包括 FRP 服务端、SSH 跳板与反向隧道、RustDesk relay 等流量转发。按 C1 提供的套餐信息，Ant 流量不限量，作为统一的中转节点；常驻应用服务及其公网入口由 [Acorn](acorn.md) 承担。
 
 ## 配置
 
@@ -42,16 +40,25 @@ ssh c1@106.15.156.143 \
 
 连接后确认主机名为 `ant`。2026-09-15 核验的 ED25519 主机公钥指纹为 `SHA256:7tZaBdB/DgeC1X31zy6F45KDTPH7iYLGTjAAfl2E+vY`。
 
-`c1` 使用现有 SSH 公钥登录，密码登录与 root SSH 登录已禁用；`sudo -n true` 已成功，无需新增 sudo 密码或复制 Acorn 的应用凭据。云 API 按[云服务访问](cloud-access.md)选择 `--account humble-little-c1 --region cn-shanghai`，使用 `swas-open` 操作该轻量服务器。
+`c1` 使用 SSH 公钥登录，禁用密码登录与 root SSH 登录，允许免密码 sudo。云 API 按[云服务访问](cloud-access.md)选择 `--account humble-little-c1 --region cn-shanghai`，使用 `swas-open` 操作该轻量服务器。
 
-采集时 SSH、Fail2ban 和 vnStat 等基础服务运行正常，没有失败的 systemd 单元。FRP、Nginx、Docker、Vaultwarden 等业务服务未启用，主机防火墙仅放行入站 TCP 22。FRP 迁移需要另行部署对应配置、开放所需端口并验证客户端；现有 Acorn 中转与 SSH 入口仍按原配置使用。
+基础运维使用 SSH、Fail2ban 和 vnStat。防火墙按中转服务开放所需端口，反向 SSH 端口只监听回环地址，通过 Ant 跳板访问。
+
+### 反向 SSH 连接约定
+
+| 客户端 | Ant 上的监听地址 | 运维入口 |
+| --- | --- | --- |
+| Charlie | `127.0.0.1:2222` | `ssh -J c1@106.15.156.143 -p 2222 c1@127.0.0.1` |
+| Axiom | `127.0.0.1:2223` | `ssh axiom-tunnel`，其 `ProxyJump` 为 `c1@106.15.156.143` |
+
+运维登录使用 `c1`；Charlie 的隧道专用用户 `tunnel-charlie` 只用于端口转发，不用作交互登录账户。客户端配置见 [Charlie](charlie.md) 和 [Axiom](axiom.md)。
 
 Ant 不做 Nix Build、Rust/Cargo Build 或其他重型编译；按[构建与系统切换](../SKILL.md#构建与系统切换)在 Axiom 构建、Ant 激活。dotfiles 的 flake 为 `.#ant`，基础镜像入口为 `hosts/ant/image.nix`。
 
 ## 镜像与恢复
 
-2026-09-15 已保留原系统恢复快照 `s-uf6e4vphwx8b4tr5nj02`，并创建可用的轻量自定义镜像 `nixos-ant-20260915`（`m-uf61yhkxw7q61knq4il8`）。镜像包含基础系统，未包含后续 FRP 部署。
+原系统恢复快照为 `s-uf6e4vphwx8b4tr5nj02`；轻量自定义基础镜像为 `nixos-ant-20260915`（`m-uf61yhkxw7q61knq4il8`）。
 
 系统通过直接写入磁盘安装；阿里云控制台可能仍显示原始镜像为 Alibaba Cloud Linux，实际运行系统以 `nixos-version` 为准。完整构建、安装、快照和校验记录见 [dotfiles 的 Ant 部署记录](https://github.com/Thrimbda/dotfiles/blob/master/hosts/ant/README.md)。
 
-来源：远端 `hostname`、`lscpu`、`/proc/meminfo`、`lsblk`、`nixos-version`、`systemctl`、`ss`、`sudo -n true`；dotfiles 的 `hosts/ant/` 与 [PR #233](https://github.com/Thrimbda/dotfiles/pull/233)；C1 于 2026-09-15 确认的流量计费信息及职责调整方向。
+来源：硬件与基础系统信息来自远端 `hostname`、`lscpu`、`/proc/meminfo`、`lsblk`、`nixos-version`、`sudo -n true`，以及 dotfiles 的 `hosts/ant/` 与 [PR #233](https://github.com/Thrimbda/dotfiles/pull/233)；流量计费信息与职责划分由 C1 指定。

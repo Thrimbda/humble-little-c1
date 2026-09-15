@@ -32,15 +32,15 @@ uname -m
 
 本机 SSH 配置中的 `ssh charlie` 仍指向 `192.168.50.29:22`，与本次读取的网络地址不同，不把该别名当作当前已验证的连接方式。
 
-从其他机器经 Acorn 回连的入口为：
+从其他机器经 [Ant](ant.md) 回连的连接约定为：
 
 ```bash
-ssh -J azar -p 2222 c1@127.0.0.1
+ssh -J c1@106.15.156.143 -p 2222 c1@127.0.0.1
 ```
 
-本次使用 Charlie 本机公钥作为临时信任记录，已验证该回连返回 `charlie` / `arm64`，没有修改现有 SSH 配置。首次从其他客户端连接这个 host/port 时，需要登记 Charlie 的 SSH host key：ED25519 指纹为 `SHA256:jdmgytDxS3VTggdurT2JbH4TYyfZUPloev9IZDhlmwE`，公钥来源为 Charlie 的 `/etc/ssh/ssh_host_ed25519_key.pub`。不要关闭 host key 校验；这里的跳板机别名 `azar` 也需要存在于发起端的 SSH 配置中。
+连接后确认返回 `charlie` / `arm64`。首次从其他客户端连接这个 host/port 时，需要登记 Charlie 的 SSH host key：ED25519 指纹为 `SHA256:jdmgytDxS3VTggdurT2JbH4TYyfZUPloev9IZDhlmwE`，公钥来源为 Charlie 的 `/etc/ssh/ssh_host_ed25519_key.pub`。不要关闭 host key 校验。
 
-隧道由 `org.nixos.autossh-reverse-ssh` LaunchAgent 维护：Charlie 使用专用密钥 `~/.ssh/id_ed25519_charlie_tunnel`，以 `tunnel-charlie` 连接 `8.159.128.125`，转发 `127.0.0.1:2222` 到 Charlie 的 SSH。该密钥与 SOPS 使用的 `~/.ssh/id_ed25519` 不同。
+隧道由 `org.nixos.autossh-reverse-ssh` LaunchAgent 维护：Charlie 使用专用密钥 `~/.ssh/id_ed25519_charlie_tunnel`，以 `tunnel-charlie` 连接 Ant（`106.15.156.143`），转发 `127.0.0.1:2222` 到 Charlie 的 SSH。该密钥与 SOPS 使用的 `~/.ssh/id_ed25519` 不同。
 
 可在 Charlie 查询隧道进程状态：
 
