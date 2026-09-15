@@ -23,7 +23,7 @@
 ## 连接与使用
 
 ```bash
-# 从 Charlie 经 Acorn 的反向 SSH 隧道连接，已验证
+# 经 Ant 的反向 SSH 隧道连接
 ssh axiom-tunnel
 
 # 一次性执行命令
@@ -31,11 +31,11 @@ ssh -o BatchMode=yes -o ConnectTimeout=8 axiom-tunnel \
   'hostname; nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader'
 ```
 
-`axiom-tunnel` 的有效 SSH 配置是 `c1@127.0.0.1:2223`，`ProxyJump azar`。`ssh axiom` 则指向局域网地址 `192.168.50.88:22`；本次从 Charlie 直连被关闭，不把它当作当前可用入口。
+`axiom-tunnel` 的连接约定为 `c1@127.0.0.1:2223`，`ProxyJump c1@106.15.156.143`；反向 SSH 隧道在 [Ant](ant.md) 上监听 `127.0.0.1:2223`。`ssh axiom` 用于局域网直连 `192.168.50.88:22`。
 
 多核编译、数据处理和 CUDA 任务优先考虑这里。先查看 `free -h`、`nvidia-smi` 和项目已有进程，再决定并行度与显存占用。当前配置不能证明某个模型或完整数据集一定能放进显存。
 
-采集时 `sshd.service`、`docker.service`、`autossh-reverse-ssh.service` 和 `display-manager.service` 均为 active。通过反向隧道工作时，重载系统或隧道服务可能断开当前 SSH；这类操作要在能承受断线的执行位置进行。
+反向隧道由 `autossh-reverse-ssh.service` 维护。通过隧道工作时，重载系统或隧道服务可能断开当前 SSH；这类操作要在能承受断线的执行位置进行。
 
 `sudo -n true` 本次未成功，不能假设 `c1` 免密码 sudo。需要提权时使用 [secrets.md](secrets.md) 中的 `axiom.sudo_password`；当前字段待填。
 

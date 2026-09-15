@@ -1,6 +1,8 @@
 # acorn
 
-个人阿里云轻量服务器，承担常驻服务、公网入口和本地机器的 SSH 中转。适合部署资源需求较小的服务；重型编译、批量计算和 GPU 任务优先安排到 Axiom。
+个人阿里云轻量服务器，负责常驻应用服务及其公网入口。适合部署资源需求较小的服务；重型编译、批量计算和 GPU 任务安排到 Axiom。
+
+Acorn 按流量计费，FRP、SSH 中转和 relay 等全部流量转发统一由 [Ant](ant.md) 承担。
 
 ## 配置
 
@@ -38,9 +40,7 @@ ssh azar 'systemctl list-units --type=service --state=running --no-pager'
 
 dotfiles 中的 `hosts/azar/default.nix` 是另一份工作站配置，不能用它代表当前云服务器。`hosts/acorn/modules/platform.nix` 将 Nix 构建设为 `max-jobs = 1`、`cores = 1`；这只是保护下限。不得在 Acorn 上运行 Nix Build、Rust/Cargo Build 或其他重型编译；按[构建与系统切换](../SKILL.md#构建与系统切换)将构建交给 Axiom，Acorn 只作为目标机切换。
 
-采集时运行的业务服务包括 Nginx、Auth Mini 及其 gateway、FRP、RustDesk signal/relay、Vaultwarden 和 `constxd`。这是运行快照；具体服务入口和配置以任务涉及的模块、服务单元为准。
-
-Acorn 上已确认有 `127.0.0.1:2222` 和 `127.0.0.1:2223` 的监听，分别供 Charlie、Axiom 的反向 SSH 使用。运维 SSH 登录用户仍是 `c1`；Charlie 的隧道专用用户 `tunnel-charlie` 只用于端口转发，不能用作交互登录账户。
+常驻应用包括 Nginx、Auth Mini 及其 gateway、Vaultwarden 和 `constxd`。具体服务入口和配置以任务涉及的模块、服务单元为准。运维 SSH 登录用户为 `c1`。
 
 `sudo -n true` 本次未成功。需要提权时使用 [secrets.md](secrets.md) 中的 `acorn.sudo_password`；当前字段待填。
 
