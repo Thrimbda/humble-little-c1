@@ -22,7 +22,9 @@ def field(record, name, optional=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--region", help="Target region; required for AWS")
+    parser.add_argument("--region", help="Target region; required when no region is saved")
+    parser.add_argument("--account", choices=("prod", "humble-little-c1"),
+                        help="Required for Alibaba Cloud; select the stored account")
     parser.add_argument("provider", choices=("aws", "aliyun"))
     parser.add_argument("command", nargs=argparse.REMAINDER,
                         help="CLI service, operation, and arguments")
@@ -31,19 +33,26 @@ def main():
         parser.error("Provide a service and operation after the provider")
     # These commands/options can expose or replace the selected credentials.
     blocked = {"--profile", "--debug", "--access-key-id", "--access-key-secret",
-               "--sts-token", "--mode", "--no-sign-request", "--region"}
+               "--sts-token", "--mode", "--no-sign-request", "--region", "--account"}
     if (args.command[0] in {"configure", "login", "logout"}
             or any(x.split("=", 1)[0] in blocked for x in args.command)):
-        parser.error("Use --region before the provider; no profile, credential, or debug overrides")
+        parser.error("Use --region/--account before the provider; no profile, credential, or debug overrides")
+    if args.provider == "aliyun" and not args.account:
+        parser.error("Alibaba Cloud requires --account before aliyun: prod or humble-little-c1")
+    if args.provider == "aws" and args.account:
+        parser.error("--account is only supported for Alibaba Cloud")
     if args.provider == "aws" and not args.region:
         parser.error("AWS has no saved region; provide --region before aws")
     if not shutil.which("sops") or not shutil.which(args.provider):
         parser.error("sops and the selected cloud CLI must be on PATH")
 
     secret_file = Path(__file__).resolve().parents[1] / "references/secrets.enc.yaml"
+    credential_path = (["aliyun", "accounts", args.account]
+                       if args.provider == "aliyun" else ["aws"])
+    extract_path = "".join(f"[{json.dumps(key)}]" for key in credential_path)
     try:
         result = subprocess.run(
-            ["sops", "decrypt", "--extract", json.dumps([args.provider]),
+            ["sops", "decrypt", "--extract", extract_path,
              "--output-type", "json", str(secret_file)],
             capture_output=True, check=True, timeout=30,
         )
@@ -51,11 +60,13 @@ def main():
         access_key = field(record, "access_key_id")
         secret_key = field(record, "secret_access_key" if args.provider == "aws"
                            else "access_key_secret")
-        region = args.region or field(record, "region")
+        region = args.region or field(record, "region", optional=True)
         if args.provider == "aliyun" and record.get("mode") != "AK":
             raise ValueError("Only the stored AK mode is supported")
     except (OSError, subprocess.SubprocessError, ValueError, AttributeError, TypeError):
         sys.exit("Cloud credential unavailable; check SOPS, the matching private key, and required fields")
+    if not region:
+        parser.error("Selected account has no saved region; provide --region before the provider")
 
     # Do not mix the selected key with a host's profile, token, or endpoint.
     env = {k: v for k, v in os.environ.items()
