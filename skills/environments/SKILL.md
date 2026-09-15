@@ -7,6 +7,8 @@ description: 当需要查询、使用或部署到 C1 的机器，或使用 C1 �
 
 机器连接与部署按下表选择；AWS、阿里云 API 操作读取[云服务访问](references/cloud-access.md)，其中包含账号来源、区域选择和从 SOPS 凭据调用 CLI 的方法。
 
+阿里云已录入原账号 `prod` 与新主账号 `humble-little-c1`（Humble Little C1），调用时必须用 `--account` 明确选择；`prod` 的现有密钥属于 RAM 用户。
+
 ## 选择机器
 
 | 机器 | 定位 | 入口与详情 |

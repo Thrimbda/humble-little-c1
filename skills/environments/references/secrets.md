@@ -8,7 +8,7 @@
 - Charles 已用 `~/.ssh/id_ed25519` 验证可解密；Charlie 的既有用法也是这个路径。SOPS 原生支持这个 SSH key，不需要转换或创建另一把 age key。
 - 私钥留在 `~/.ssh`，不放进 skill。这个 recipient 只允许持有匹配私钥的环境解密，不能假设五台机器各自的 SSH key 都能解密。
 - 机器凭据位于各机器的 `ssh_user`、`sudo_password` 字段。当前五组字段均非空，但非空不代表密码已通过登录或 sudo 验证。`null` 或空字符串是待填写标记，不是空密码。
-- AWS 凭据位于 `aws`，阿里云凭据位于 `aliyun`；两组均从 Charles 的既有 CLI 配置导入。字段、来源和调用方法见[云服务访问](cloud-access.md)。
+- AWS 凭据位于 `aws`。阿里云按账号分组：`aliyun.accounts.prod` 保留原 `prod` profile 的 RAM 用户密钥；`aliyun.accounts.humble-little-c1` 保存从下载 CSV 导入的 Humble Little C1 主账号密钥。两组阿里云记录均含实测的 `account_id`、`identity_type`；字段、来源和选择方法见[云服务访问](cloud-access.md)。
 
 SSH 本身继续使用现有 SSH 配置和密钥认证。若任务只需普通用户权限，无需解密密码。
 
