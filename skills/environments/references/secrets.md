@@ -1,12 +1,12 @@
 # 加密凭据
 
-凭据文件是本目录的 [secrets.enc.yaml](secrets.enc.yaml)，采用 SOPS 加密 YAML。命名沿用 `~/Work/blog/secrets` 的 `*.enc.<格式>` 习惯；[.sops.yaml](.sops.yaml) 使用与 blog 相同的 Ed25519 SSH 公钥作为 age recipient。
+凭据文件是本目录的 [secrets.enc.yaml](secrets.enc.yaml)，采用 SOPS 加密 YAML。命名沿用 `~/Work/blog/secrets` 的 `*.enc.<格式>` 习惯；[.sops.yaml](.sops.yaml) 保留原 Ed25519 SSH recipient，并新增 `hatch` recipient。
 
 ## 文件与密钥
 
 - 非空值由 SOPS 加密，字段名仍可见；SOPS 元数据包含解密所需的 recipient 和加密数据密钥。
-- Charles 已用 `~/.ssh/id_ed25519` 验证可解密；Charlie 的既有用法也是这个路径。SOPS 原生支持这个 SSH key，不需要转换或创建另一把 age key。
-- 私钥留在 `~/.ssh`，不放进 skill。这个 recipient 只允许持有匹配私钥的环境解密，不能假设五台机器各自的 SSH key 都能解密。
+- Charles 已用 `~/.ssh/id_ed25519` 验证可解密；Charlie 的既有用法也是这个路径。SOPS 原生支持 SSH Ed25519 key，不需要转换或创建另一把 age key。
+- 新增的 `hatch` recipient 对应私钥只保存在小电脑的 `~/.ssh/sops-deploy`。在那台电脑上解密时设置 `SOPS_AGE_SSH_PRIVATE_KEY_FILE="$HOME/.ssh/sops-deploy"`；私钥不随 skill 分发。每个 recipient 只允许持有匹配私钥的环境解密，不能假设其他机器各自的 SSH key 也能解密。
 - 机器凭据位于各机器的 `ssh_user`、`sudo_password` 字段。当前五组字段均非空，但非空不代表密码已通过登录或 sudo 验证。`null` 或空字符串是待填写标记，不是空密码。
 - AWS 凭据位于 `aws`。阿里云按账号分组：`aliyun.accounts.prod` 保留原 `prod` profile 的 RAM 用户密钥；`aliyun.accounts.humble-little-c1` 保存从下载 CSV 导入的 Humble Little C1 主账号密钥。两组阿里云记录均含实测的 `account_id`、`identity_type`；字段、来源和选择方法见[云服务访问](cloud-access.md)。
 

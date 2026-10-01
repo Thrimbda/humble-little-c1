@@ -1,4 +1,5 @@
 creation_rules:
   - path_regex: ^secrets\.enc\.yaml$
-    age: >-
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrC5k/qhfJUVkMG0Fr+RKEIf1VV9Q6eSWLcnP+NXiFR
+    age:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrC5k/qhfJUVkMG0Fr+RKEIf1VV9Q6eSWLcnP+NXiFR
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAT99NXjXmvNed4x5jqL60l4A8ZWiDa0Sn7f9SbBJPdQ hatch
