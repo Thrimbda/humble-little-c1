@@ -2,7 +2,7 @@
 
 凭据文件为 [secrets.enc.yaml](secrets.enc.yaml)，字段为 `cloudflare.api_token`。2026-09-09 从 Charlie 的 `~/dotfiles/hosts/acorn/secrets/cloudflare-dns.env.age` 解密提取 `CF_DNS_API_TOKEN`，仅在内存和 SSH 管道中转交 SOPS 加密；已在 Charlie 解密新密文，与原 token 比对一致。
 
-[.sops.yaml](.sops.yaml) 沿用 `environments` 的 SSH Ed25519 age recipient。匹配私钥位于 Charlie 的 `~/.ssh/id_ed25519`，不随 skill 分发。其他机器没有匹配私钥时，在 Charlie 执行 API 操作；不要为了使用 skill 复制私钥。
+[.sops.yaml](.sops.yaml) 保留 `environments` 的 SSH Ed25519 age recipient，并新增 `hatch` recipient。原 recipient 的匹配私钥位于 Charlie 的 `~/.ssh/id_ed25519`；`hatch` 对应私钥只保存在小电脑的 `~/.ssh/sops-deploy`。私钥不随 skill 分发；其他机器没有匹配私钥时，不要为了使用 skill 复制私钥。
 
 原 agenix 文件仍被 Acorn 的 `hosts/acorn/secrets/secrets.nix` 声明。本次只迁入 skill 使用的 SOPS 凭据，不删除该系统声明、旧密文或 `/run/agenix` 运行时文件，也不激活系统。此凭据在 dotfiles 中用于 Acorn 的 Cloudflare DNS 配置；`hosts/charlie/secrets/cloudflare-api-token.age` 中的另一枚 token 仅通过了 `.space` DNS 读取，不作为本 skill 的凭据。`cloudflared-credentials.age` 是另一份 Tunnel 凭据，不是本 skill 的 API token。
 
