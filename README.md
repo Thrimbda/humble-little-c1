@@ -16,6 +16,9 @@ skills/
     SKILL.md                 # 域名分工与 Cloudflare DNS 配置
     references/              # 域名资料、操作说明与 SOPS 加密 token
     scripts/                 # 通过加密凭据调用 Cloudflare API
+  codex-usage/
+    SKILL.md                 # Codex app-server socket、schema 与会话操作
+    references/              # RPC 消息与 Unix WebSocket 直连示例
 scripts/
   install-skills.sh           # 安装本仓库的全部 skills
 ```
@@ -27,6 +30,8 @@ scripts/
 新增 skill 时，在 `skills/<skill-name>/SKILL.md` 中填写 frontmatter 的 `name`、`description` 和正文；安装脚本会自动发现全部 skills。
 
 [前端设计与实现 skill](skills/frontend/SKILL.md) 包含任务组织、视觉基础、组件与数据表达规范；主文件和参考文档均随 skill 目录安装。
+
+[Codex Usage skill](skills/codex-usage/SKILL.md) 说明如何核对 app-server 协议，通过 socket 创建或继续会话、选择模型与思考强度，并接收及读回输出。
 
 ## 安装
 
