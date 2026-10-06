@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Usage"
+  short_description: "通过 Codex app-server 协议操作会话、选择模型并读取输出"
+  default_prompt: "使用 $codex-usage 核对目标 app-server 的版本、schema 与 socket 协议，完成当前会话操作并验证结果。"

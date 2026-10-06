@@ -1,0 +1,200 @@
+# 协议参考
+
+以下字段按 Codex CLI **0.160.1** 的生成 schema 校验。`MODEL_FROM_CATALOG`、`THREAD_ID`、`TURN_ID` 和 `ITEM_ID` 代表运行时取得的值；路径换成目标服务器上的绝对路径。示例不是固定模型目录。
+
+## 消息 envelope 与传输
+
+省略 `jsonrpc` 字段。根据字段组合分派消息，`id` 可为字符串或整数，要检查字段是否存在，不能用真假值判断 `id`：
+
+| 字段 | 含义 | 客户端动作 |
+| --- | --- | --- |
+| `id` + `result` | 成功响应 | 完成该 ID 的等待请求 |
+| `id` + `error` | 失败响应 | 记录 `code`、`message`、可选 `data` |
+| `id` + `method` | 服务器请求 | 处理后回复相同 ID |
+| `method`、没有 `id` | 通知 | 更新状态，不回复 |
+
+stdio：将紧凑 JSON 后加换行，flush，持续解析 stdout。stderr 是诊断输出，不与协议混合。
+
+Unix WebSocket：先在 Unix socket 上完成 HTTP Upgrade，再收发 WebSocket 文本消息。交给支持 Unix socket 的 WebSocket 库处理握手、mask、分片与 ping/pong，不能把 `recv()` 的任意字节块当成完整 JSON。
+
+### 直接连接已有 Unix socket 的只读示例
+
+下面程序需要 Python 的 `websockets` 包，使用已核对的 `websockets.asyncio.client.unix_connect` 接口。将它保存为脚本，以实际 socket 路径作为第一个参数运行。它只初始化连接并读取模型目录，不创建会话。
+
+```python
+import asyncio
+import json
+import sys
+from websockets.asyncio.client import unix_connect
+
+async def main(path):
+    async with unix_connect(path, uri="ws://localhost/", open_timeout=10,
+                            max_size=16 * 1024 * 1024) as ws:
+        # 仅用于这个串行、只读探测；完整客户端使用下文的持续 dispatcher。
+        async def rpc(request_id, method, params):
+            await ws.send(json.dumps({"id": request_id, "method": method,
+                                      "params": params}))
+            while True:
+                msg = json.loads(await asyncio.wait_for(ws.recv(), 30))
+                if "method" in msg:
+                    if "id" in msg:
+                        await ws.send(json.dumps({"id": msg["id"], "error": {
+                            "code": -32601, "message": "Unsupported by read-only probe"}}))
+                    continue
+                if msg.get("id") == request_id:
+                    if "error" in msg:
+                        raise RuntimeError(msg["error"])
+                    return msg["result"]
+
+        await rpc(1, "initialize", {"clientInfo": {
+            "name": "codex_usage_probe", "version": "0.1.0"},
+            "capabilities": {"experimentalApi": False}})
+        await ws.send(json.dumps({"method": "initialized"}))
+        cursor = None
+        request_id = 2
+        while True:
+            page = await rpc(request_id, "model/list", {"cursor": cursor, "limit": 100})
+            for model in page["data"]:
+                print(json.dumps({key: model[key] for key in (
+                    "model", "defaultReasoningEffort", "supportedReasoningEfforts")}))
+            cursor = page.get("nextCursor")
+            if cursor is None:
+                break
+            request_id += 1
+
+asyncio.run(main(sys.argv[1]))
+```
+
+在该版本中，`codex app-server proxy --sock ...` 只转发原始字节；如果经过 proxy，发送和接收的仍是 WebSocket 握手与帧。若要 JSONL，使用明确提供 stdio transport 的 app-server；这会启动独立服务。
+
+## 最小会话链路
+
+下文每个 JSON 对象是一条消息。WebSocket 一条文本消息传一个对象；stdio 将每个对象压成一行后发送。先等待初始化成功：
+
+```json
+{"id":1,"method":"initialize","params":{"clientInfo":{"name":"codex_usage_client","title":"Codex Usage","version":"0.1.0"},"capabilities":{"experimentalApi":false}}}
+```
+
+```json
+{"method":"initialized"}
+```
+
+查询模型，分页读取 `result.data` 与 `result.nextCursor`：
+
+```json
+{"id":2,"method":"model/list","params":{"limit":100}}
+```
+
+从目录的 `model` 字段取得模型名称，并确认支持 `high` 后，创建持久会话：
+
+```json
+{"id":3,"method":"thread/start","params":{"cwd":"/absolute/project","ephemeral":false,"model":"MODEL_FROM_CATALOG","config":{"model_reasoning_effort":"high"}}}
+```
+
+读取 `result.thread.id`，并检查 `result.model`、`result.reasoningEffort`、`cwd`、审批与 sandbox 有效值。然后开始用户要求的任务：
+
+```json
+{"id":4,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"第一条任务","text_elements":[]}],"model":"MODEL_FROM_CATALOG","effort":"high"}}
+```
+
+保存 `result.turn.id`。响应可能是 `inProgress`，持续处理事件直至目标 turn 完成。0.160.1 文本输入的 `text_elements` 在 schema 中可省略，显式空数组也合法。
+
+第二条消息等当前 turn 完成后发送；省略 model/effort 则沿用当前 thread 设置：
+
+```json
+{"id":5,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"第二条任务","text_elements":[]}]}}
+```
+
+重连时重新初始化，先 resume 再发送下一条任务：
+
+```json
+{"id":6,"method":"thread/resume","params":{"threadId":"THREAD_ID"}}
+```
+
+`thread/resume` 不会自动启动新 turn。不要用 `thread/fork` 代替继续原会话，它会生成新 ID。
+
+## 持续 dispatcher 与完成条件
+
+启动接收循环后再发 RPC，确保通知即使先于响应到达也能被记录。客户端维护两类状态：
+
+```text
+pendingRequests[requestId]              请求等待者
+items[threadId, turnId, itemId]          输出及 item 状态
+
+收到 response → 完成/拒绝匹配的 pendingRequests
+收到 server request → 按 method 与用户授权处理，回复原 id
+收到 notification → 更新对应 thread/turn/item 状态
+```
+
+注册等待者、保存已观察的完成状态后再等待，避免丢失提前到达的 `turn/completed`。重连时拒绝旧连接未完成的 RPC 等待者；“没有响应”不等于服务器没有执行。
+
+典型文本 delta：
+
+```json
+{"method":"item/agentMessage/delta","params":{"threadId":"THREAD_ID","turnId":"TURN_ID","itemId":"ITEM_ID","delta":"部分文本"}}
+```
+
+`item/completed.params.item.type == "agentMessage"` 时，将该 item 的文本替换为 `item.text`。保留多个 item 的顺序；有 `phase` 时区分 commentary 与 final_answer，不把所有消息揉成一份最终答复。是否存在这些字段以当前 schema 为准。
+
+`turn/completed.params` 包含 `threadId` 与完整 `turn`；只接受匹配 turn ID 的完成事件，检查 `turn.status`。命令日志、思考流或任意一个 `item/completed` 都不是整个任务完成的证据。
+
+服务器请求的回复 envelope，例如用户已经拒绝某个命令审批时：
+
+```json
+{"id":"SERVER_REQUEST_ID","result":{"decision":"decline"}}
+```
+
+这里的 `id` 换成服务器请求原值，保留原类型。`decision` 必须匹配该 method 的响应类型；命令审批、文件审批、权限申请、用户问题、动态工具调用各有不同 schema。操作结果和用户回答按真实授权返回。
+
+执行中追加与中断：
+
+```json
+{"id":7,"method":"turn/steer","params":{"threadId":"THREAD_ID","expectedTurnId":"TURN_ID","input":[{"type":"text","text":"对当前任务的追加指示","text_elements":[]}]}}
+```
+
+```json
+{"id":8,"method":"turn/interrupt","params":{"threadId":"THREAD_ID","turnId":"TURN_ID"}}
+```
+
+中断响应 `{}` 只是接受请求，仍应等目标 turn 的终止状态；`interrupted` 与成功完成分开报告。
+
+## 历史与列表
+
+只读历史，不恢复执行：
+
+```json
+{"id":9,"method":"thread/read","params":{"threadId":"THREAD_ID","includeTurns":true}}
+```
+
+传统完整历史读取：检查 `result.thread.turns[].items`，从 `type == "agentMessage"` 的 item 取得 `text`。
+
+分页历史：先获取 thread 元数据；若当前版本支持 `thread/turns/list`，读取所有 turn 页，选择 `itemsView: "full"`：
+
+```json
+{"id":10,"method":"thread/turns/list","params":{"threadId":"THREAD_ID","limit":50,"sortDirection":"asc","itemsView":"full"}}
+```
+
+检查返回 turn 的 `itemsView`。`summary` 或 `notLoaded` 不代表完整 items；缺少完整 item 时，使用可用的 `thread/items/list`：
+
+```json
+{"id":11,"method":"thread/items/list","params":{"threadId":"THREAD_ID","turnId":"TURN_ID","limit":100,"sortDirection":"asc"}}
+```
+
+0.160.1 的 turns 响应为 `result.data[]`；items 响应为 `result.data[]` 的 `ThreadItemEntry`，从 entry 的 `item` 字段读取内容。两者分别跟随 `nextCursor`，把返回 cursor 原样传入下一次同样查询。方法不存在、要求实验能力或 store 不支持时，按该服务器支持的历史接口处理并报告缺口，不能用 summary 声称全文已读回。
+
+验收非归档的 CLI/exec/app-server 会话：
+
+```json
+{"id":12,"method":"thread/list","params":{"limit":100,"sortKey":"updated_at","sourceKinds":["cli","vscode","exec","appServer"],"archived":false}}
+```
+
+在 `result.data` 中找实际 ID，按 `nextCursor` 继续。这个 sourceKinds 示例只覆盖上述四类；需要全面查询时，从目标 schema 的 `ThreadSourceKind` 取得全部需要的来源。`thread/loaded/list` 只查内存中的 thread，不等于持久化列表。
+
+持久化验收与推理验收分开：检查首个任务的完成状态、新连接读回、列表检索；桌面 UI 是否呈现则另行检查。不要通过修改 rollout 文件或数据库伪造来源和可见性。
+
+## 参考
+
+- [OpenAI App Server 协议](https://learn.chatgpt.com/docs/app-server#protocol)
+- [Python websockets Unix 客户端](https://websockets.readthedocs.io/en/stable/reference/asyncio/client.html#websockets.asyncio.client.unix_connect)
+
+Schema 和模型目录使用运行时生成/查询结果，不随本 skill 打包固定快照。
