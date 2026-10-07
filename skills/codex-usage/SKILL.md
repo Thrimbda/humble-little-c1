@@ -1,6 +1,6 @@
 ---
 name: codex-usage
-description: 当需要直接对接 Codex app-server 的 socket 或 RPC 协议，查询本机 schema、创建或继续 thread/session、选择模型与思考强度、接收输出，或排查 session 列表可见性时使用。
+description: 当需要直接对接 Codex app-server 的 socket 或 RPC 协议，查询本机 schema、创建或继续 thread/session、选择模型、思考强度与工具权限、接收输出，或排查 session 列表可见性时使用。
 ---
 
 # Codex Usage
@@ -76,9 +76,29 @@ done
 
 `thread/start` 没有顶层 `effort`。读取启动响应中的 `model`、`reasoningEffort` 等有效值，确认配置实际生效。该版本 turn 的 `model`/`effort` 覆盖也影响后续 turns；只想临时调整时，下次显式恢复原值。具体行为仍需核对目标版本的字段说明。
 
+## 权限模式
+
+**默认使用 Auto Review。** 新建或恢复会话时，显式按选定模式配置权限；不要依赖服务器默认 reviewer。用户指定 Full access 时使用完全权限模式。
+
+| 模式 | `approvalPolicy` | `approvalsReviewer` | `sandbox` |
+| --- | --- | --- | --- |
+| Auto Review（默认） | `on-request` | `auto_review` | `workspace-write` |
+| Full access（完全权限） | `never` | 可省略；不执行审批 review | `danger-full-access` |
+
+- **Auto Review**：工作区边界内的常规工具调用直接执行；需要审批的操作交给 app-server 的自动 reviewer。`on-request` 配合 `auto_review` 是自动审批，不是逐次询问用户。不要用 `never` 来配置 Auto Review，它会关闭审批询问，而不会自动批准需要审批的请求。
+- **Full access**：取消 Codex 的文件系统和网络沙箱限制，并且不询问审批。它仍受进程所属用户、管理员策略及外部服务授权限制；不把服务器请求一律回复为批准。
+
+**不选择或自动回退到人工 Ask for approval 模式**，即把交互式审批交给 `approvalsReviewer: "user"`。采用 Auto Review 时，若目标版本不支持、管理员不允许，或返回的有效 reviewer 为 `user`，报告配置限制，不继续发送任务，也不自行改成 Full access 绕过。Full access 使用 `never`，不触发交互式审批，不能仅凭保留的 reviewer 值认定它是人工 Ask 模式。
+
+Auto Review 拒绝、失败或超时时，按真实状态报告，不通过改 reviewer 或无条件批准来绕过。这个规则针对工具审批模式；正常的任务信息补充与工具业务输入仍按实际需要处理。
+
+`thread/start` / `thread/resume` 使用上表的 `sandbox` 字符串。`turn/start` 使用 `sandboxPolicy` 对象：Auto Review 为 `{"type":"workspaceWrite"}`，Full access 为 `{"type":"dangerFullAccess"}`，审批字段名保持不变。覆盖会影响后续 turns；续发与重连保持用户当前选定的模式，切回 Auto Review 时重新显式设置其审批与 reviewer 字段。
+
+检查启动或恢复响应中的有效 `approvalPolicy`、`approvalsReviewer` 与 `sandbox`。Auto Review 应返回 `on-request`、`auto_review` 和 `sandbox.type == "workspaceWrite"`。若用户另行要求只读等 sandbox 边界，保留该边界并继续使用自动 reviewer。具体消息见[权限示例](references/protocol.md#权限模式示例)。
+
 ## 4. 创建、执行与继续
 
-1. `thread/start`：传目标机器上的绝对 `cwd`，需持久会话时设 `ephemeral: false`，保存 `result.thread.id`。审批和 sandbox 使用当前任务要求或有效默认值。
+1. `thread/start`：传目标机器上的绝对 `cwd`，需持久会话时设 `ephemeral: false`，保存 `result.thread.id`。权限默认显式配置 Auto Review，用户选定其他允许模式时按上节设置。
 2. `turn/start`：传 `threadId` 与 `input`。文本输入可写 `{"type":"text","text":"任务内容","text_elements":[]}`；必填项以生成 schema 为准。
 3. 同时保存返回的 `turn.id` 并持续接收事件。启动响应只是接受/启动结果，不是最终输出。
 4. 当前 turn 完成后，再以相同 `threadId` 发下一次 `turn/start`。
@@ -116,6 +136,7 @@ done
 ## 文档入口
 
 - [OpenAI 官方 App Server 文档](https://learn.chatgpt.com/docs/app-server)：生命周期与协议说明。
+- [官方自动审批与权限模式说明](https://learn.chatgpt.com/docs/agent-approvals-security#automatic-approval-reviews)：Auto Review 与 Full access 的区别。
 - [官方 App Server 源码说明](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md)：进一步核对实现；注意 `main` 与安装版本可能不同。
 
 本 skill 的具体字段与 Unix/proxy 差异核验于 **2026-10-07，Codex CLI 0.160.1**。使用时重新核对目标版本，避免把这个快照当成所有版本的固定协议。

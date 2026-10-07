@@ -85,16 +85,16 @@ asyncio.run(main(sys.argv[1]))
 {"id":2,"method":"model/list","params":{"limit":100}}
 ```
 
-从目录的 `model` 字段取得模型名称，并确认支持 `high` 后，创建持久会话：
+从目录的 `model` 字段取得模型名称，并确认支持 `high` 后，以默认 Auto Review 创建持久会话：
 
 ```json
-{"id":3,"method":"thread/start","params":{"cwd":"/absolute/project","ephemeral":false,"model":"MODEL_FROM_CATALOG","config":{"model_reasoning_effort":"high"}}}
+{"id":3,"method":"thread/start","params":{"cwd":"/absolute/project","ephemeral":false,"model":"MODEL_FROM_CATALOG","config":{"model_reasoning_effort":"high"},"approvalPolicy":"on-request","approvalsReviewer":"auto_review","sandbox":"workspace-write"}}
 ```
 
-读取 `result.thread.id`，并检查 `result.model`、`result.reasoningEffort`、`cwd`、审批与 sandbox 有效值。然后开始用户要求的任务：
+读取 `result.thread.id`，并检查 `result.model`、`result.reasoningEffort`、`cwd`、`approvalPolicy`、`approvalsReviewer` 与 `sandbox` 有效值。确认 reviewer 为 `auto_review`，再开始用户要求的任务：
 
 ```json
-{"id":4,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"第一条任务","text_elements":[]}],"model":"MODEL_FROM_CATALOG","effort":"high"}}
+{"id":4,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"第一条任务","text_elements":[]}],"model":"MODEL_FROM_CATALOG","effort":"high","approvalPolicy":"on-request","approvalsReviewer":"auto_review","sandboxPolicy":{"type":"workspaceWrite"}}}
 ```
 
 保存 `result.turn.id`。响应可能是 `inProgress`，持续处理事件直至目标 turn 完成。0.160.1 文本输入的 `text_elements` 在 schema 中可省略，显式空数组也合法。
@@ -105,13 +105,33 @@ asyncio.run(main(sys.argv[1]))
 {"id":5,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"第二条任务","text_elements":[]}]}}
 ```
 
-重连时重新初始化，先 resume 再发送下一条任务：
+重连时重新初始化，按当前选定权限模式先 resume 再发送下一条任务。默认 Auto Review 的恢复请求：
 
 ```json
-{"id":6,"method":"thread/resume","params":{"threadId":"THREAD_ID"}}
+{"id":6,"method":"thread/resume","params":{"threadId":"THREAD_ID","approvalPolicy":"on-request","approvalsReviewer":"auto_review","sandbox":"workspace-write"}}
 ```
 
 `thread/resume` 不会自动启动新 turn。不要用 `thread/fork` 代替继续原会话，它会生成新 ID。
+
+## 权限模式示例
+
+上面的新建、执行与恢复示例显式设置 Auto Review。`on-request` 决定哪些操作需要审批，`auto_review` 决定由自动 reviewer 处理；工作区内已允许的操作不会每次都触发 review。检查新建/恢复响应的 reviewer，不能以字段被接受就认定自动审批已经生效。
+
+用户指定 Full access 时，新建会话可使用：
+
+```json
+{"id":20,"method":"thread/start","params":{"cwd":"/absolute/project","ephemeral":false,"approvalPolicy":"never","sandbox":"danger-full-access"}}
+```
+
+在已有 thread 开始 turn 时设置完全权限，`sandboxPolicy` 必须是对象：
+
+```json
+{"id":21,"method":"turn/start","params":{"threadId":"THREAD_ID","input":[{"type":"text","text":"用户要求的任务","text_elements":[]}],"approvalPolicy":"never","sandboxPolicy":{"type":"dangerFullAccess"}}}
+```
+
+恢复之前选定 Full access 的会话时，在 `thread/resume` 传 `approvalPolicy: "never"`、`sandbox: "danger-full-access"`，不套用默认 Auto Review 的恢复示例。切回 Auto Review 时重新设置 `on-request`、`auto_review` 与相应 sandbox。
+
+`never` 不等于“自动批准”，也不解除 sandbox；完全权限必须同时设置 `danger-full-access` / `dangerFullAccess`。此模式不执行 Auto Review，仍需遵守目标进程和外部服务的有效权限。不要选择人工 Ask 模式，也不要在自动审批不受支持、被拒绝或失败时回退到人工 reviewer 或自行改成完全权限。
 
 ## 持续 dispatcher 与完成条件
 
