@@ -178,7 +178,81 @@ items[threadId, turnId, itemId]          输出及 item 状态
 
 中断响应 `{}` 只是接受请求，仍应等目标 turn 的终止状态；`interrupted` 与成功完成分开报告。
 
-## 历史与列表
+## 按项目列出全部 session
+
+先使用前文的 `initialize` / `initialized` 完成连接初始化。以下操作只读取会话列表，不需要 `model/list`、`thread/start`、`thread/resume` 或 `turn/start`。
+
+### 查询范围与首个请求
+
+在目标服务器对应版本的生成 schema 中查看 `ThreadListParams`、`ThreadListResponse` 和 `ThreadSourceKind`。0.160.1 的 `ThreadSourceKind` 完整枚举为下方十项；其他版本重新读取枚举，不把这个示例当成永久固定列表。
+
+`cwd` 精确匹配会话记录的工作路径，可以是一个字符串或多个路径的数组。示例中的第二个路径只代表已确认属于同一项目的 worktree；不会自动包含其他子目录或 worktree。路径使用目标机器上的绝对路径；若记录使用另一条路径或符号链接形式，先核对实际 cwd，不凭路径前缀判断归属。
+
+首个请求覆盖这两个 cwd 的全部来源、未归档会话：
+
+```json
+{
+  "id": 30,
+  "method": "thread/list",
+  "params": {
+    "cwd": ["/absolute/project", "/absolute/project/.worktrees/example"],
+    "sourceKinds": ["cli", "vscode", "exec", "appServer", "subAgent", "subAgentReview", "subAgentCompact", "subAgentThreadSpawn", "subAgentOther", "unknown"],
+    "archived": false,
+    "limit": 100,
+    "sortKey": "updated_at",
+    "sortDirection": "desc"
+  }
+}
+```
+
+不要省略 `sourceKinds` 或传空数组来表示“所有来源”：这会使用默认交互来源。`modelProviders` 省略、`null` 或 `[]` 时包含所有 provider；完整查询省略它，也不添加 `searchTerm`、`originators`、`sectionId` 等额外过滤条件。
+
+### 响应、分页与归档
+
+从 `result.data[]` 读取 thread，保留真实 `id`、`name`（可为空）、`preview`、`cwd`、`source`、`status` 与 `updatedAt`。`updatedAt` 为 Unix 秒时间戳；`source` 可能是字符串或 sub-agent 等结构，按返回值保留。列表中的 `turns` 为空，不能从列表读取完整历史。
+
+后续页复制同一组查询条件，加入上一页的 `result.nextCursor`，并使用新的 RPC ID。cursor 是不透明字符串，不解析或自行生成；即使某页 `data` 为空，只要还有 `nextCursor` 就继续。直到 cursor 为 `null` 或不存在，才完成该查询。
+
+再以相同 cwd、来源及排序条件、`archived: true` 开始新的完整遍历；第一请求不携带未归档查询的 cursor。`archived: true` 只查归档，`false`、省略或 `null` 只查未归档，没有省略此字段就返回两类的语义。归档标记由查询条件附到清单，不假设 thread 自带 `archived` 字段。
+
+### 可复用的分页函数
+
+下面函数接收前文已初始化连接上的串行 `rpc` 函数、明确的项目 cwd 数组与从目标 schema 读取的完整 `source_kinds`。在 `main` 中调用 `await list_project_threads(rpc, project_cwds, source_kinds)`，即可用其返回值展示清单。示例为 0.160.1 的 cwd 数组接口；仅支持字符串的旧版本逐路径调用后按 ID 合并。请求 ID 从 100 开始，调用方应避免与同连接其他请求重复。
+
+```python
+async def list_project_threads(rpc, project_cwds, source_kinds):
+    if not project_cwds or not source_kinds:
+        raise ValueError("Provide project cwd paths and all schema source kinds")
+    base = {"cwd": project_cwds, "sourceKinds": source_kinds, "limit": 100,
+            "sortKey": "updated_at", "sortDirection": "desc"}
+    rows = {}
+    request_id = 100
+    for archived in (False, True):
+        cursor = None
+        while True:
+            params = {**base, "archived": archived}
+            if cursor is not None:
+                params["cursor"] = cursor
+            page = await rpc(request_id, "thread/list", params)
+            request_id += 1
+            for thread in page["data"]:
+                rows[thread["id"]] = {
+                    "threadId": thread["id"], "name": thread.get("name"),
+                    "preview": thread["preview"], "cwd": thread["cwd"],
+                    "source": thread["source"], "status": thread["status"],
+                    "updatedAt": thread["updatedAt"], "archived": archived,
+                }
+            cursor = page.get("nextCursor")
+            if cursor is None:
+                break
+    return sorted(rows.values(), key=lambda row: row["updatedAt"], reverse=True)
+```
+
+`rpc` 应像前文那样将错误响应或超时抛出，不将它们转换为成功的空页。某页失败时，此函数不返回一个貌似完整的清单；需要交付部分结果的客户端单独保留已取得页，明确缺口。完整遍历后按 thread ID 去重，并注明服务器/存储、cwd、来源、归档范围与分页完成情况；这是该次查询的覆盖范围，不是另一套存储或查询期间所有变化的一致快照。
+
+`thread/loaded/list` 只查当前服务内存中的 thread ID，不能替代这个持久化清单。临时会话或另一套 `CODEX_HOME` 中的会话也不由上述查询覆盖。用户选定真实 `threadId` 后，按下一节读取历史；用户要求继续时，按[最小会话链路](#最小会话链路)恢复并发送下一条任务。
+
+## 读回历史
 
 只读历史，不恢复执行：
 
@@ -202,19 +276,12 @@ items[threadId, turnId, itemId]          输出及 item 状态
 
 0.160.1 的 turns 响应为 `result.data[]`；items 响应为 `result.data[]` 的 `ThreadItemEntry`，从 entry 的 `item` 字段读取内容。两者分别跟随 `nextCursor`，把返回 cursor 原样传入下一次同样查询。方法不存在、要求实验能力或 store 不支持时，按该服务器支持的历史接口处理并报告缺口，不能用 summary 声称全文已读回。
 
-验收非归档的 CLI/exec/app-server 会话：
-
-```json
-{"id":12,"method":"thread/list","params":{"limit":100,"sortKey":"updated_at","sourceKinds":["cli","vscode","exec","appServer"],"archived":false}}
-```
-
-在 `result.data` 中找实际 ID，按 `nextCursor` 继续。这个 sourceKinds 示例只覆盖上述四类；需要全面查询时，从目标 schema 的 `ThreadSourceKind` 取得全部需要的来源。`thread/loaded/list` 只查内存中的 thread，不等于持久化列表。
-
-持久化验收与推理验收分开：检查首个任务的完成状态、新连接读回、列表检索；桌面 UI 是否呈现则另行检查。不要通过修改 rollout 文件或数据库伪造来源和可见性。
+持久化验收与推理验收分开：检查用户要求的首个任务的完成状态、新连接读回、[完整列表检索](#按项目列出全部-session)；桌面 UI 是否呈现则另行检查。只列举或读历史时不额外启动任务。不要通过修改 rollout 文件或数据库伪造来源和可见性。
 
 ## 参考
 
 - [OpenAI App Server 协议](https://learn.chatgpt.com/docs/app-server#protocol)
+- [官方会话列表、分页与过滤说明](https://learn.chatgpt.com/docs/app-server#list-threads-with-pagination--filters)
 - [Python websockets Unix 客户端](https://websockets.readthedocs.io/en/stable/reference/asyncio/client.html#websockets.asyncio.client.unix_connect)
 
 Schema 和模型目录使用运行时生成/查询结果，不随本 skill 打包固定快照。
