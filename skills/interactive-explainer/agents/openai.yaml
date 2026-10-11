@@ -1,0 +1,4 @@
+interface:
+  display_name: "交互式讲解与视频"
+  short_description: "用可探索的 HTML 讲清原理，按需加入配音并导出讲解视频"
+  default_prompt: "使用 $interactive-explainer 把当前材料做成清楚、可探索的讲解，按我的需求选择纯 HTML、带配音 HTML 或视频。"
