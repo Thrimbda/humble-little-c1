@@ -19,6 +19,9 @@ skills/
   codex-usage/
     SKILL.md                 # Codex app-server socket、schema 与会话操作
     references/              # RPC 消息与 Unix WebSocket 直连示例
+  interactive-explainer/
+    SKILL.md                 # 交互式 HTML 讲解，可选配音与视频导出
+    references/              # HTML 运行、TTS 选择、视频导出与验证
 scripts/
   install-skills.sh           # 安装本仓库的全部 skills
 ```
@@ -32,6 +35,8 @@ scripts/
 [前端设计与实现 skill](skills/frontend/SKILL.md) 包含任务组织、视觉基础、组件与数据表达规范；主文件和参考文档均随 skill 目录安装。
 
 [Codex Usage skill](skills/codex-usage/SKILL.md) 说明如何核对 app-server 协议，通过 socket 创建或继续会话、选择模型与思考强度，并接收及读回输出。
+
+[交互式讲解与视频 skill](skills/interactive-explainer/SKILL.md) 将交互式 HTML 作为独立交付物，按需要选择 Edge TTS、CosyVoice3 或已有录音，并从同一场景导出讲解视频。
 
 ## 安装
 
