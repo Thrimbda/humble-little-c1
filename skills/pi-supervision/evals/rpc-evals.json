@@ -1,0 +1,31 @@
+{
+  "skill_name": "pi-supervision",
+  "evals": [
+    {
+      "id": 4,
+      "name": "persistent-stdio",
+      "prompt": "离线演练，不运行实际 pi。用户要求用已配置的 deepseek/deepseek-flash 持续监督本机 pi，同一个进程跑两轮，每轮先审查后再派下一轮。宿主 macOS，有 Python3/pi，没有 Nix/systemd；pi 支持 RPC stdio、prompt/steer/follow_up/clear_queue/abort 与 agent_settled。说明具体启动方式、如何通过 stdin 发两轮提示、如何接收输出和留档，以及宿主只提供 exec_command/write_stdin 时怎么接入。不要把日志轮询当事件接收。",
+      "expected_output": "持久 RPC 主路径，精确 session，同进程两轮、明确 stdin 保持打开与事件流，保留中间输入输出和独立审查。",
+      "files": [],
+      "assertions": [
+        "默认选择持久 RPC，并在同一 runner/pi 进程内完成两轮。",
+        "提供可执行的 stdin 命令格式和输出事件接收方式，区分外层工具等待。",
+        "明确保持 stdin 打开，EOF 不是发送一轮后的完成标记。",
+        "每轮先独立审查，再派新轮；追加输入及原文完整留档。"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "rpc-cancellation",
+      "prompt": "离线演练，不运行实际 pi。持久 RPC 第 03 轮仍在工作，已有 follow_up 排队。用户要求立刻停下，取消旧排队任务后按修正目标开新轮。另一个无关 pi 会话仍在运行。与此同时你知道 prompt response.success=true 只表示接受命令，handled 表示没有模型运行，且追加指令有可能恰好在 agent_settled 之后才得到 queued 确认。给出具体取消、完成判断、恢复方式及向用户的回传。",
+      "expected_output": "clear_queue 确认后 abort，检查 idle/部分修改后新轮；不误判 queued/handled/settled 竞争为成功。",
+      "files": [],
+      "assertions": [
+        "等待 clear_queue 成功后再 abort，避免继续旧 follow_up。",
+        "取消完成后检查部分改动，同 session 新轮继续，不影响无关进程。",
+        "不把 response.success 或 handled 当模型任务执行成功。",
+        "识别 settled 与追加 queued 的竞争，检查/清理未执行队列并重新派发，不能假报完成。"
+      ]
+    }
+  ]
+}

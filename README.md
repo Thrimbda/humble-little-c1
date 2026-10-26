@@ -40,7 +40,7 @@ scripts/
 
 [Codex Usage skill](skills/codex-usage/SKILL.md) 说明如何核对 app-server 协议，通过 socket 创建或继续会话、选择模型与思考强度，并接收及读回输出。
 
-[Pi Supervision skill](skills/pi-supervision/SKILL.md) 将本机 pi-coding-agent 作为受监督的执行者，逐轮保留 prompt、流式事件、文字结果和审查证据。按实际宿主选择工具链，附带 POSIX runner；模型、路径和资源预算按任务指定。
+[Pi Supervision skill](skills/pi-supervision/SKILL.md) 通过持久 RPC stdio 调度本机 pi-coding-agent，支持多轮派工、运行中纠偏与取消，逐轮保留输入、流式事件、文字结果和审查证据。按实际宿主选择工具链，附带 POSIX runner；模型、路径和资源预算按任务指定。
 
 [交互式讲解与视频 skill](skills/interactive-explainer/SKILL.md) 将交互式 HTML 作为独立交付物，按需要选择 Edge TTS、CosyVoice3 或已有录音，并从同一场景导出讲解视频。
 

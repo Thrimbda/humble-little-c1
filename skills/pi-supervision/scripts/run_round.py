@@ -29,8 +29,9 @@ def save_meta(directory, meta):
 
 
 class Events:
-    def __init__(self, output, live, meta):
+    def __init__(self, output, live, meta, display=True):
         self.output, self.live, self.meta = output, live, meta
+        self.display = display
         self.settled = False
         self.last_stop = None
 
@@ -50,7 +51,8 @@ class Events:
                     text = delta["delta"]
                     self.live.write(text)
                     self.live.flush()
-                    print(text, end="", flush=True)
+                    if self.display:
+                        print(text, end="", flush=True)
             elif kind == "message_end":
                 msg = event["message"]
                 if msg.get("role") == "assistant":

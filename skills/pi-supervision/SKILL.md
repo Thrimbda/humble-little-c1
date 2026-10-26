@@ -5,7 +5,7 @@ description: 当用户要求调度本机 pi-coding-agent（Pi）执行任务、�
 
 # Pi Supervision
 
-把 pi 当作受监督的执行者：当前 agent 负责理解目标、派工、纠偏和验收，pi 负责有边界的实现。一次成功退出只表示执行轮次结束，不能替代任务验收。
+把 pi 当作受监督的执行者：当前 agent 负责理解目标、派工、纠偏和验收，pi 负责有边界的实现。默认保持一个 RPC 进程，通过 stdin 发指令、stdout 收事件；执行完成不能替代任务验收。
 
 ## 1. 先确定目标和现场
 
@@ -31,15 +31,17 @@ description: 当用户要求调度本机 pi-coding-agent（Pi）执行任务、�
 
 ## 3. 执行、持续读取并回传
 
-先运行附带脚本的 `--help`，再按已选参数执行 `scripts/run_round.py`。使用显式 provider/model、`--mode json --print`、固定 `--session` 和 prompt 文件；不要用含糊的 `--continue` 选“最近会话”。先做短 smoke 验证当前 pi 版本符合协议。
+先阅读 [运行与协议](references/runtime.md)，运行 `scripts/run_session.py --help`。以显式 provider/model 和固定 session 启动一次 runner；它启动 `pi --mode rpc`，保持双向 stdio。收到 `ready` 后，通过 runner 的 stdin 发 JSONL `prompt`，每轮用新的 `round` 和绝对 `prompt_file`。运行中可发 `steer` 或 `follow_up`；它们归当前轮留档。收到 `round_finished`、独立审查后，再向同一进程派发下一轮。
 
-脚本逐轮保存 `prompt.md`、`events.jsonl`、`output.md`、`live.txt`、`stderr.log`、`meta.json`。完整事件与文字留在本机；分享前检查并遮盖凭据，不能将原始日志自动提交到仓库。
+先做短 smoke 核对当前版本的协议。不要用含糊的 `--continue` 选“最近会话”；RPC 不接收 `@file`，runner 会读取 prompt 文件并通过 stdin 发送内容。保留 `run_round.py` 仅作明确选择的单轮 JSON/print 备用路径。
 
-**存盘和向用户回传是两件事。** 持续读取输出，每轮都在当前会话展示 prompt 要点、pi 输出文字（较长时给原文链接及摘要）、监督结论和下一步。工作期间按宿主会话要求更新进度，默认不要超过 60 秒没有消息。等待采用短轮询，不用一个长阻塞调用把整轮藏起来。
+脚本逐轮保存 `prompt.md`、`inputs.jsonl`、`events.jsonl`、`output.md`、`live.txt`、`stderr.log`、`meta.json`，会话另存完整控制命令与跨轮事件。运行中追加或纠偏的文字也在 inputs 中，不只保存最初的 prompt。原始记录留在本机，分享前遮盖凭据，不自动提交到仓库。
+
+**存盘和向用户回传是两件事。** runner 持续等待并读取管道事件，不轮询日志文件。宿主只能分次获取命令输出时，监督者在外层短等待读取新增输出；这不改变 runner 与 pi 的双向 stdio。每轮回传 prompt、pi 文字（较长时附原文链接）、监督结论和下一步，运行中默认不超过 60 秒没有进度消息。保持 stdin 打开；EOF 会取消活跃轮并关闭会话。
 
 ## 4. 监督者独立验收
 
-先检查执行是否完成：退出码、最终 assistant `stopReason`、`agent_settled` 和异常记录。`agent_end` 后可能重试，零退出码也可能有失败；保留恢复前的错误，不把已恢复错误误判为最终失败。
+先检查 `round_finished.status` 和轮次元数据：RPC `response.success` 仅表示命令处理成功；`handled` 不代表模型执行过任务。执行完整要求相关响应已收齐、最终 assistant 为 `stop`、收到未 aborted 的 `agent_settled` 且流无损坏。持久进程在轮间继续存活，不等待每轮进程退出；会话关闭时再核对退出状态。`agent_end` 后可能重试；保留已恢复错误而不误判终态。
 
 再检查任务是否完成：自己读 diff、追踪真实入口和数据流，并运行与改动相称的检查。测试通过不能代替审查测试是否覆盖用户要求。关注真实调用方是否传入新信息、旧分支是否仍截断数据、来源和时间语义是否一致；单独 helper 测试不证明集成有效。
 
@@ -47,8 +49,8 @@ description: 当用户要求调度本机 pi-coding-agent（Pi）执行任务、�
 
 ## 5. 中断、续跑与交付
 
-用户修正影响当前实现时，及时停止当前轮并告知原因。附带 runner 支持在该轮目录创建 `STOP` 或向 runner 发 SIGINT/SIGTERM，保留部分输出和退出原因。仅停止本轮拥有的进程；不使用全局 `pkill pi`。细节见 [运行与协议](references/runtime.md)。
+用户修正影响当前实现时，通过 `steer` 排入纠偏；若必须立即停下，向 runner 发 `abort`。runner 先等待 `clear_queue` 成功，再发送 `abort`，避免旧 follow-up 在中断后继续。确认取消完成后可在同一进程开新轮。`shutdown`、stdin EOF 或 SIGINT/SIGTERM 会取消活跃轮并关闭会话；RPC 取消失效时仅清理所拥有的进程组。不使用全局 `pkill pi`。
 
-中断后先核对进程已结束、session 和工作区的部分变更，再创建新轮次续跑，不能盲目重放可能已执行的写操作。若锁仍被持有，调查持有者，不删除锁来绕过并发保护。
+中断后先核对 pi 已 idle 或退出、session 和部分变更，再创建新轮续跑，不盲目重放写操作。会话异常退出时，以同一精确 session 重启 runner；旧轮不可覆盖。锁覆盖持久会话全生命周期；若仍被持有，调查持有者，不删除锁绕过保护。
 
 只有最终目标和验收证据都满足，才交付代码、验证结果、轮次记录入口及剩余限制。版本冻结、提交、PR 或发布按用户要求及仓库规则处理；记录精确提交、版本和验证范围，不能把“存在一个版本号”视为已冻结。此 skill 本身不授权合并、部署或对外发消息。
