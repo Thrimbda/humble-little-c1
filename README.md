@@ -19,6 +19,10 @@ skills/
   codex-usage/
     SKILL.md                 # Codex app-server socket、schema 与会话操作
     references/              # RPC 消息与 Unix WebSocket 直连示例
+  pi-supervision/
+    SKILL.md                 # 本机 pi 的逐轮调度、回传、纠偏与独立验收
+    references/              # 环境选择、事件协议和轮次记录
+    scripts/                 # 保留记录的 runner 与协议/中断测试
   interactive-explainer/
     SKILL.md                 # 交互式 HTML 讲解，可选配音与视频导出
     references/              # HTML 运行、TTS 选择、视频导出与验证
@@ -35,6 +39,8 @@ scripts/
 [前端设计与实现 skill](skills/frontend/SKILL.md) 包含任务组织、视觉基础、组件与数据表达规范；主文件和参考文档均随 skill 目录安装。
 
 [Codex Usage skill](skills/codex-usage/SKILL.md) 说明如何核对 app-server 协议，通过 socket 创建或继续会话、选择模型与思考强度，并接收及读回输出。
+
+[Pi Supervision skill](skills/pi-supervision/SKILL.md) 通过持久 RPC stdio 调度本机 pi-coding-agent，支持多轮派工、运行中纠偏与取消，逐轮保留输入、流式事件、文字结果和审查证据。按实际宿主选择工具链，附带 POSIX runner；模型、路径和资源预算按任务指定。
 
 [交互式讲解与视频 skill](skills/interactive-explainer/SKILL.md) 将交互式 HTML 作为独立交付物，按需要选择 Edge TTS、CosyVoice3 或已有录音，并从同一场景导出讲解视频。
 
