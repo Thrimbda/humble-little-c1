@@ -1,0 +1,4 @@
+# Local skill evaluations and Python runtime artifacts.
+/skills/*-workspace/
+__pycache__/
+*.py[cod]

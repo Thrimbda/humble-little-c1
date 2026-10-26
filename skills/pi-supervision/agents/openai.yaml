@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pi Supervision"
+  short_description: "监督本机 pi 逐轮执行任务，保存输入输出并独立验收"
+  default_prompt: "使用 $pi-supervision，根据当前宿主与项目环境调度本机 pi-coding-agent，逐轮保存并回传 prompt、输出和审查结果，持续纠偏直到达成用户目标。"
